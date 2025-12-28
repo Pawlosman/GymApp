@@ -45,6 +45,26 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const [workouts, setWorkouts] = useState([])
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [setsCounts, setSetsCounts] = useState({})
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [pendingSync, setPendingSync] = useState(false)
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      syncOfflineData()
+    }
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   useEffect(() => {
     if (externalSelectedDate) setSelectedDate(externalSelectedDate)
@@ -56,16 +76,106 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedDate])
 
+  // Load from localStorage
+  function getLocalStorageKey() {
+    return `workouts_${user?.id}_${selectedDate}`
+  }
+
+  function saveToLocalStorage(data) {
+    try {
+      localStorage.setItem(getLocalStorageKey(), JSON.stringify(data))
+      // Mark as pending sync
+      const pendingKey = `pending_sync_${user?.id}`
+      const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
+      if (!pending.includes(selectedDate)) {
+        pending.push(selectedDate)
+        localStorage.setItem(pendingKey, JSON.stringify(pending))
+      }
+      setPendingSync(true)
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e)
+    }
+  }
+
+  function loadFromLocalStorage() {
+    try {
+      const data = localStorage.getItem(getLocalStorageKey())
+      return data ? JSON.parse(data) : null
+    } catch (e) {
+      console.error('Failed to load from localStorage:', e)
+      return null
+    }
+  }
+
+  async function syncOfflineData() {
+    if (!user || !navigator.onLine) return
+
+    const pendingKey = `pending_sync_${user.id}`
+    const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
+
+    for (const date of pending) {
+      const localKey = `workouts_${user.id}_${date}`
+      const localData = localStorage.getItem(localKey)
+      if (localData) {
+        const workoutsToSync = JSON.parse(localData)
+        for (const workout of workoutsToSync) {
+          try {
+            // Try to update if exists, otherwise insert
+            const { error } = await supabase
+              .from('workouts')
+              .upsert({
+                ...workout,
+                user_id: user.id,
+                date: date
+              }, {
+                onConflict: 'id'
+              })
+            if (error) console.error('Sync error:', error)
+          } catch (e) {
+            console.error('Failed to sync:', e)
+          }
+        }
+      }
+    }
+
+    // Clear pending sync list
+    localStorage.removeItem(pendingKey)
+    setPendingSync(false)
+    fetchWorkouts()
+  }
+
   async function fetchWorkouts() {
     if (!user) return
-    const { data, error } = await supabase
-      .from('workouts')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('date', selectedDate)
-      .order('id', { ascending: true })
-    if (error) console.error(error)
-    else setWorkouts(data || [])
+
+    // Try to load from localStorage first
+    const localData = loadFromLocalStorage()
+    if (localData) {
+      setWorkouts(localData)
+    }
+
+    // If online, fetch from Supabase
+    if (navigator.onLine) {
+      try {
+        const { data, error } = await supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('date', selectedDate)
+          .order('id', { ascending: true })
+        if (error) console.error(error)
+        else {
+          setWorkouts(data || [])
+          // Save to localStorage for offline access
+          saveToLocalStorage(data || [])
+        }
+      } catch (e) {
+        console.error('Failed to fetch from Supabase:', e)
+        // Use local data if available
+        if (localData) {
+          setWorkouts(localData)
+        }
+      }
+    }
   }
 
   // support several input formats for selectedDate (ISO or dd/mm/yyyy or mm/dd/yyyy)
@@ -139,15 +249,26 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           reindexed[newIndex] = updatedSetRecords[oldIndex]
         })
 
-      // Update database
-      supabase
-        .from('workouts')
-        .update({ set_records: reindexed })
-        .eq('id', myRecord.id)
-        .then(({ error }) => {
-          if (error) console.error(error)
-          else fetchWorkouts()
-        })
+      // Update local state immediately
+      const updatedWorkouts = workouts.map(w =>
+        w.exercise_name === exerciseName
+          ? { ...w, set_records: reindexed }
+          : w
+      )
+      setWorkouts(updatedWorkouts)
+      saveToLocalStorage(updatedWorkouts)
+
+      // Update database if online
+      if (navigator.onLine && !String(myRecord.id).startsWith('temp_')) {
+        supabase
+          .from('workouts')
+          .update({ set_records: reindexed })
+          .eq('id', myRecord.id)
+          .then(({ error }) => {
+            if (error) console.error(error)
+            else fetchWorkouts()
+          })
+      }
     }
 
     // Decrease the count
@@ -159,34 +280,19 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
 
   async function saveSetRecord(exerciseName, setIndex, reps, weight) {
     if (!user) return alert('Sign in first')
-    
-    const { data, error: selectError } = await supabase
-      .from('workouts')
-      .select('id, set_records')
-      .eq('user_id', user.id)
-      .eq('date', selectedDate)
-      .eq('exercise_name', exerciseName)
-      .single()
 
-    if (selectError && selectError.code !== 'PGRST116') {
-      console.error(selectError)
-      return
-    }
-
-    const setRecordsData = data?.set_records || {}
+    // Find existing workout record
+    let myRecord = workouts.find(w => w.exercise_name === exerciseName)
+    const setRecordsData = myRecord?.set_records || {}
     setRecordsData[setIndex] = { reps, weight }
 
-    if (data?.id) {
-      const { error } = await supabase
-        .from('workouts')
-        .update({ set_records: setRecordsData })
-        .eq('id', data.id)
-      if (error) console.error(error)
-      else fetchWorkouts()
-    } else {
-      const { error } = await supabase
-        .from('workouts')
-        .insert([{
+    // Update local state immediately
+    const updatedWorkouts = myRecord
+      ? workouts.map(w => w.exercise_name === exerciseName
+          ? { ...w, set_records: setRecordsData }
+          : w)
+      : [...workouts, {
+          id: `temp_${Date.now()}`,
           user_id: user.id,
           date: selectedDate,
           exercise_name: exerciseName,
@@ -194,9 +300,39 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           sets: exerciseTemplate.find(e => e.name === exerciseName)?.sets || 1,
           reps: reps || 0,
           weight: weight || 0
-        }])
-      if (error) console.error(error)
-      else fetchWorkouts()
+        }]
+
+    setWorkouts(updatedWorkouts)
+    saveToLocalStorage(updatedWorkouts)
+
+    // If online, sync to Supabase
+    if (navigator.onLine) {
+      try {
+        if (myRecord && !String(myRecord.id).startsWith('temp_')) {
+          const { error } = await supabase
+            .from('workouts')
+            .update({ set_records: setRecordsData })
+            .eq('id', myRecord.id)
+          if (error) console.error(error)
+          else fetchWorkouts()
+        } else {
+          const { error } = await supabase
+            .from('workouts')
+            .insert([{
+              user_id: user.id,
+              date: selectedDate,
+              exercise_name: exerciseName,
+              set_records: setRecordsData,
+              sets: exerciseTemplate.find(e => e.name === exerciseName)?.sets || 1,
+              reps: reps || 0,
+              weight: weight || 0
+            }])
+          if (error) console.error(error)
+          else fetchWorkouts()
+        }
+      } catch (e) {
+        console.error('Failed to save online:', e)
+      }
     }
   }
 
@@ -210,7 +346,26 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
 
   return (
     <div className="container-fluid p-4">
-      <h2 className="mb-4">{dateDisplay}</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">{dateDisplay}</h2>
+        <div>
+          {!isOnline && (
+            <span className="badge bg-warning text-dark me-2">
+              ⚠ Offline Mode
+            </span>
+          )}
+          {pendingSync && (
+            <span className="badge bg-info text-dark">
+              ⏳ Pending Sync
+            </span>
+          )}
+          {isOnline && !pendingSync && (
+            <span className="badge bg-success">
+              ✓ Synced
+            </span>
+          )}
+        </div>
+      </div>
 
       {exerciseTemplate.length === 0 ? (
         <div className="alert alert-info">No training scheduled for {weekday}</div>
