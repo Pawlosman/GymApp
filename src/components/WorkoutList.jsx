@@ -423,6 +423,11 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
             const lastRecord = lastWorkouts.find(w => w.exercise_name === exercise.name)
             const lastSetRecords = lastRecord?.set_records || {}
 
+            // Get the last (final) set from previous workout
+            const lastSetIndices = Object.keys(lastSetRecords).map(Number).sort((a, b) => b - a)
+            const lastSetIndex = lastSetIndices.length > 0 ? lastSetIndices[0] : null
+            const lastFinalSet = lastSetIndex !== null ? lastSetRecords[lastSetIndex] : {}
+
             return (
               <div key={exercise.name} className="col-md-6 col-lg-4">
                 <div className="card">
@@ -455,7 +460,6 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                       <tbody>
                         {Array.from({ length: currentSets }).map((_, setIndex) => {
                           const savedSet = mySetRecords[setIndex] || {}
-                          const lastSet = lastSetRecords[setIndex] || {}
                           const hasUserReps = savedSet.reps !== undefined && savedSet.reps !== null
                           const hasUserWeight = savedSet.weight !== undefined && savedSet.weight !== null
 
@@ -466,7 +470,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
-                                  placeholder={lastSet.reps ? `${lastSet.reps}` : 'Reps'}
+                                  placeholder={lastFinalSet.reps ? `${lastFinalSet.reps}` : 'Reps'}
                                   defaultValue={savedSet.reps || ''}
                                   style={hasUserReps ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
@@ -481,7 +485,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
-                                  placeholder={lastSet.weight ? `${lastSet.weight}` : 'Weight'}
+                                  placeholder={lastFinalSet.weight ? `${lastFinalSet.weight}` : 'Weight'}
                                   defaultValue={savedSet.weight || ''}
                                   style={hasUserWeight ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
