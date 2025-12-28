@@ -3,7 +3,6 @@ import { supabase } from './supabaseClient'
 import Login from './components/Login'
 import WorkoutList from './components/WorkoutList'
 import Sidebar from './components/Sidebar'
-import ThemeToggle from './components/ThemeToggle'
 
 export default function App() {
   const [session, setSession] = useState(null)
@@ -41,7 +40,6 @@ export default function App() {
             </nav>
             <WorkoutList user={session.user} selectedDate={selectedDate} />
           </div>
-          <ThemeToggle />
         </>
       )}
     </div>
