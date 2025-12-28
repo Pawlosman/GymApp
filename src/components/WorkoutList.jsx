@@ -66,9 +66,10 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     else setWorkouts(data || [])
   }
 
-  const dateObj = new Date(selectedDate + 'T00:00:00Z')
-  const monthIndex = dateObj.getUTCMonth()
-  const weekday = getWeekdayName(selectedDate)
+  const [sy, sm, sd] = selectedDate.split('-').map(Number)
+  const localDateObj = new Date(sy, sm - 1, sd)
+  const monthIndex = localDateObj.getMonth()
+  const weekday = WEEKDAY_NAMES[localDateObj.getDay()]
   const dateDisplay = formatDateDisplay(selectedDate)
   const trainingInfo = getTrainingForMonth(monthIndex)
   const training = trainingInfo?.training
