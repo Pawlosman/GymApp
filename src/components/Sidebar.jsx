@@ -47,7 +47,13 @@ export default function Sidebar({ onSelectDate }) {
       setIsMobile(window.innerWidth <= 768)
     }
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    // listen for global toggle event (from navbar)
+    const toggleHandler = () => setIsOpen((v) => !v)
+    window.addEventListener('toggleSidebar', toggleHandler)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('toggleSidebar', toggleHandler)
+    }
   }, [])
 
   const days = daysForMonth(month)

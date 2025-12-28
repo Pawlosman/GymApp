@@ -28,17 +28,26 @@ export default function App() {
         ) : (
           <>
             <nav className="navbar navbar-light bg-primary sticky-top" style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
-              <div className="container-fluid">
-                <span className="navbar-brand mb-0 h5 text-white" style={{ marginLeft: '50px' }}>GymApp</span>
-                <button 
-                  className="btn btn-outline-light btn-sm"
-                  onClick={async () => {
-                    await supabase.auth.signOut()
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
+              <div className="container-fluid d-flex align-items-center">
+                  <button
+                    className="btn btn-outline-light btn-sm d-lg-none me-2"
+                    onClick={() => window.dispatchEvent(new Event('toggleSidebar'))}
+                    aria-label="Open sidebar"
+                  >
+                    ☰
+                  </button>
+                  <span className="navbar-brand mb-0 h5 text-white">GymApp</span>
+                  <div className="ms-auto">
+                    <button 
+                      className="btn btn-outline-light btn-sm"
+                      onClick={async () => {
+                        await supabase.auth.signOut()
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
             </nav>
             <WorkoutList user={session.user} selectedDate={selectedDate} />
           </>
