@@ -1,14 +1,103 @@
-body { font-family: system-ui, Arial, sans-serif; padding: 16px; }
-.app { max-width: 1000px; margin: 0 auto; }
-.layout .main-area { display:flex; gap:16px }
-.sidebar { width:200px; border-right:1px solid #eee; padding-right:12px }
-.sidebar .months button { display:block; margin-bottom:6px }
-.sidebar .active { font-weight:bold }
-.content { flex:1 }
-.day-list { margin: 8px 0 16px; display:flex; gap:8px; flex-wrap:wrap }
-.day-list button { padding:6px 8px }
-.selected { background: #2b6cb0; color: white }
-.add-form input { margin-right:8px }
-.error { color: red }
-.plan { background:#f8f9fb; padding:8px; margin:8px 0 }
-.planned ul { margin:6px 0 0 16px }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #f5f5f5;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.app > aside {
+  flex-shrink: 0;
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+}
+
+.app > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.navbar {
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.workouts, .add-form input {
+  margin-right: 8px;
+}
+
+.error {
+  color: #dc3545;
+}
+
+.plan {
+  background: #f8f9fb;
+  padding: 8px;
+  margin: 8px 0;
+}
+
+.planned ul {
+  margin: 6px 0 0 16px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .app > aside {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    border-right: 1px solid #dee2e6;
+    overflow-y: auto;
+    background-color: white;
+  }
+
+  .app > aside.open {
+    left: 0;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .form-control-sm,
+  .form-select-sm {
+    font-size: 0.875rem;
+  }
+}

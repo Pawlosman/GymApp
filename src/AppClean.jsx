@@ -17,26 +17,33 @@ export default function App() {
   }, [])
 
   return (
-    <div className="app">
-      <Sidebar onSelectDate={(d) => setSelectedDate(d)} />
-      {!session ? (
-        <div className="container-fluid p-4">
-          <h1>GymApp</h1>
-          <Login />
-        </div>
-      ) : (
-        <div className="container-fluid p-4">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h1>GymApp</h1>
-            <button className="btn btn-danger" onClick={async () => {
-              await supabase.auth.signOut()
-            }}>
-              Logout
-            </button>
+    <div className="app d-flex">
+      {session && <Sidebar onSelectDate={(d) => setSelectedDate(d)} />}
+      <div className="flex-grow-1" style={{ overflow: 'auto' }}>
+        {!session ? (
+          <div className="container-fluid p-4">
+            <h1 className="mb-4">GymApp</h1>
+            <Login />
           </div>
-          <WorkoutList user={session.user} selectedDate={selectedDate} />
-        </div>
-      )}
+        ) : (
+          <>
+            <nav className="navbar navbar-light bg-primary sticky-top">
+              <div className="container-fluid">
+                <span className="navbar-brand mb-0 h5 text-white">GymApp</span>
+                <button 
+                  className="btn btn-outline-light btn-sm"
+                  onClick={async () => {
+                    await supabase.auth.signOut()
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </nav>
+            <WorkoutList user={session.user} selectedDate={selectedDate} />
+          </>
+        )}
+      </div>
     </div>
   )
 }
