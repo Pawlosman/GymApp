@@ -27,15 +27,16 @@ export default function App() {
           <div style={{ flex: 1 }}>
             <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
               <div className="container-fluid">
-                <span className="navbar-brand mb-0 h1">Gym App</span>
-                <button
-                  className="btn btn-outline-danger btn-sm"
-                  onClick={async () => {
-                    await supabase.auth.signOut()
-                  }}
-                >
-                  Logout
-                </button>
+                <div className="ms-auto">
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={async () => {
+                      await supabase.auth.signOut()
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             </nav>
             <WorkoutList user={session.user} selectedDate={selectedDate} />
