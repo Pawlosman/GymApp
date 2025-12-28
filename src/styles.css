@@ -1,0 +1,14 @@
+body { font-family: system-ui, Arial, sans-serif; padding: 16px; }
+.app { max-width: 1000px; margin: 0 auto; }
+.layout .main-area { display:flex; gap:16px }
+.sidebar { width:200px; border-right:1px solid #eee; padding-right:12px }
+.sidebar .months button { display:block; margin-bottom:6px }
+.sidebar .active { font-weight:bold }
+.content { flex:1 }
+.day-list { margin: 8px 0 16px; display:flex; gap:8px; flex-wrap:wrap }
+.day-list button { padding:6px 8px }
+.selected { background: #2b6cb0; color: white }
+.add-form input { margin-right:8px }
+.error { color: red }
+.plan { background:#f8f9fb; padding:8px; margin:8px 0 }
+.planned ul { margin:6px 0 0 16px }

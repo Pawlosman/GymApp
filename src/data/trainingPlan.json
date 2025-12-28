@@ -1,0 +1,12 @@
+{
+  "2025-12": [
+    { "date": "2025-12-02", "day": "Tuesday", "exercises": ["Squat 3x8 80kg", "Bench 3x8 60kg", "Row 3x10 60kg"] },
+    { "date": "2025-12-04", "day": "Thursday", "exercises": ["Deadlift 3x5 120kg", "Pullup 3x8 bodyweight"] },
+    { "date": "2025-12-06", "day": "Saturday", "exercises": ["Overhead Press 3x8 40kg", "Lunge 3x10 each 30kg"] }
+  ],
+  "2026-01": [
+    { "date": "2026-01-06", "day": "Tuesday", "exercises": ["Squat 4x6 85kg", "Bench 3x6 65kg"] },
+    { "date": "2026-01-08", "day": "Thursday", "exercises": ["Deadlift 3x5 125kg"] },
+    { "date": "2026-01-10", "day": "Saturday", "exercises": ["Press 3x6 45kg"] }
+  ]
+}

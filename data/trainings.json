@@ -1,0 +1,17 @@
+{
+  "Tuesday": [
+    { "name": "Back Squat", "sets": 4, "reps": 6, "weight": 80 },
+    { "name": "Leg Press", "sets": 3, "reps": 10, "weight": 120 },
+    { "name": "Hamstring Curl", "sets": 3, "reps": 12, "weight": 40 }
+  ],
+  "Thursday": [
+    { "name": "Bench Press", "sets": 4, "reps": 6, "weight": 70 },
+    { "name": "Incline DB Press", "sets": 3, "reps": 8, "weight": 28 },
+    { "name": "Triceps Pushdown", "sets": 3, "reps": 12, "weight": 25 }
+  ],
+  "Saturday": [
+    { "name": "Deadlift", "sets": 4, "reps": 5, "weight": 120 },
+    { "name": "Barbell Row", "sets": 3, "reps": 8, "weight": 60 },
+    { "name": "Pull-ups", "sets": 3, "reps": 8, "weight": 0 }
+  ]
+}
