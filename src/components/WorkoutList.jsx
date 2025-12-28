@@ -43,7 +43,6 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const todayDate = isoDate(new Date())
   const [selectedDate, setSelectedDate] = useState(todayDate)
   const [workouts, setWorkouts] = useState([])
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [setsCounts, setSetsCounts] = useState({})
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingSync, setPendingSync] = useState(false)
@@ -293,8 +292,9 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
       localStorage.setItem(pendingKey, JSON.stringify(updated))
     } else {
       localStorage.removeItem(pendingKey)
-      setPendingSync(false)
     }
+    // Always update state to trigger re-render
+    setPendingSync(false)
   }
 
   async function saveSetRecord(exerciseName, setIndex, reps, weight) {
@@ -361,14 +361,6 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
         console.error('Failed to save online:', e)
       }
     }
-  }
-
-  async function deleteWorkout(id) {
-    if (!user) return
-    const { error } = await supabase.from('workouts').delete().eq('id', id)
-    if (error) console.error(error)
-    else fetchWorkouts()
-    setDeleteConfirm(null)
   }
 
   return (
@@ -486,51 +478,6 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
               </div>
             )
           })}
-        </div>
-      )}
-
-      {deleteConfirm && (
-        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Delete Workout?</h5>
-                <button type="button" className="btn-close" onClick={() => setDeleteConfirm(null)}></button>
-              </div>
-              <div className="modal-body">
-                <p>Are you sure you want to delete this workout record?</p>
-                <p className="fw-bold mb-0">{deleteConfirm.exercise_name}</p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setDeleteConfirm(null)}>Cancel</button>
-                <button type="button" className="btn btn-danger" onClick={() => deleteWorkout(deleteConfirm.id)}>Delete</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {workouts.length > 0 && (
-        <div className="mt-4">
-          <h4>Recorded Workouts</h4>
-          <div className="list-group">
-            {workouts.map((w) => (
-              <div key={w.id} className="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="mb-2">{w.exercise_name}</h6>
-                  <small className="text-muted">
-                    {w.sets}x{w.reps} @ {w.weight}kg
-                  </small>
-                </div>
-                <button 
-                  className="btn btn-sm btn-outline-danger"
-                  onClick={() => setDeleteConfirm(w)}
-                >
-                  🗑 Delete
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>
