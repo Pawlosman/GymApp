@@ -7,20 +7,23 @@ const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', '
 const DAY_NUMBERS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 function isoDate(date) {
-  return date.toISOString().slice(0, 10)
+  // Use local date, not UTC
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function getWeekdayName(isoDateStr) {
-  const date = new Date(isoDateStr + 'T00:00:00Z')
-  return WEEKDAY_NAMES[date.getUTCDay()]
+  const [year, month, day] = isoDateStr.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  return WEEKDAY_NAMES[date.getDay()]
 }
 
 function formatDateDisplay(isoDateStr) {
-  const date = new Date(isoDateStr + 'T00:00:00Z')
-  const day = date.getUTCDate()
-  const month = date.getUTCMonth() + 1
-  const year = date.getUTCFullYear()
-  const dayName = DAY_NUMBERS[date.getUTCDay()]
+  const [year, month, day] = isoDateStr.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const dayName = DAY_NUMBERS[date.getDay()]
   return `${dayName} ${day}/${month}/${year}`
 }
 
