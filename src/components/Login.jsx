@@ -49,11 +49,6 @@ export default function Login() {
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-lg border-0">
               <div className="card-body p-5">
-                <div className="text-center mb-4">
-                  <h1 className="h3 mb-3 fw-bold text-primary">Sign In</h1>
-                  <p className="text-muted">Track your workouts and progress</p>
-                </div>
-
                 {error && (
                   <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     {error}
