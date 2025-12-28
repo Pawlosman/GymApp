@@ -44,6 +44,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const [selectedDate, setSelectedDate] = useState(todayDate)
   const [workouts, setWorkouts] = useState([])
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [setsCounts, setSetsCounts] = useState({})
 
   useEffect(() => {
     if (externalSelectedDate) setSelectedDate(externalSelectedDate)
@@ -103,6 +104,30 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
       const foundKey = Object.keys(training).find(k => k.toLowerCase() === lower || k.toLowerCase().startsWith(lower.slice(0,3)))
       if (foundKey) exerciseTemplate = training[foundKey]
     }
+  }
+
+  // Initialize set counts from template
+  useEffect(() => {
+    const initialCounts = {}
+    exerciseTemplate.forEach(ex => {
+      initialCounts[ex.name] = ex.sets
+    })
+    setSetsCounts(initialCounts)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, weekday])
+
+  function addSet(exerciseName) {
+    setSetsCounts(prev => ({
+      ...prev,
+      [exerciseName]: (prev[exerciseName] || 0) + 1
+    }))
+  }
+
+  function removeSet(exerciseName) {
+    setSetsCounts(prev => ({
+      ...prev,
+      [exerciseName]: Math.max(1, (prev[exerciseName] || 1) - 1)
+    }))
   }
 
   async function saveSetRecord(exerciseName, setIndex, reps, weight) {
@@ -167,13 +192,42 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           {exerciseTemplate.map((exercise) => {
             const myRecord = workouts.find(w => w.exercise_name === exercise.name)
             const mySetRecords = myRecord?.set_records || {}
+            const currentSets = setsCounts[exercise.name] || exercise.sets
 
             return (
               <div key={exercise.name} className="col-md-6 col-lg-4">
                 <div className="card">
                   <div className="card-header bg-primary text-white">
-                    <h5 className="mb-0">{exercise.name}</h5>
-                    <small>Target: {exercise.sets}x{exercise.reps}</small>
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h5 className="mb-0">{exercise.name}</h5>
+                        <small>Target: {exercise.sets}x{exercise.reps}</small>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <button
+                          className="btn btn-warning"
+                          onClick={() => {
+                            console.log('Remove set clicked for', exercise.name)
+                            removeSet(exercise.name)
+                          }}
+                          title="Remove set"
+                          style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
+                        >
+                          −
+                        </button>
+                        <button
+                          className="btn btn-success"
+                          onClick={() => {
+                            console.log('Add set clicked for', exercise.name)
+                            addSet(exercise.name)
+                          }}
+                          title="Add set"
+                          style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   <div className="card-body">
                     <table className="table table-sm">
@@ -185,7 +239,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.from({ length: exercise.sets }).map((_, setIndex) => {
+                        {Array.from({ length: currentSets }).map((_, setIndex) => {
                           const savedSet = mySetRecords[setIndex] || {}
                           return (
                             <tr key={setIndex}>

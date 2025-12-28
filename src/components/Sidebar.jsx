@@ -35,7 +35,7 @@ function daysForMonth(yearMonth) {
   return days
 }
 
-export default function Sidebar({ onSelectDate }) {
+export default function Sidebar({ onSelectDate, selectedDate }) {
   const now = new Date()
   const defaultMonth = now.toISOString().slice(0, 7)
   const todayIso = isoDate(now)
@@ -103,6 +103,7 @@ export default function Sidebar({ onSelectDate }) {
           trainingData={trainingData}
           onSelectDate={onSelectDate}
           todayIso={todayIso}
+          selectedDate={selectedDate}
         />
       </aside>
     )
@@ -134,6 +135,7 @@ export default function Sidebar({ onSelectDate }) {
         trainingData={trainingData}
         onSelectDate={handleSelectDate}
         todayIso={todayIso}
+        selectedDate={selectedDate}
       />
     </aside>
   )
@@ -147,7 +149,7 @@ export default function Sidebar({ onSelectDate }) {
   )
 }
 
-function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate }) {
   return (
     <>
       <h4 className="mb-4">
@@ -165,14 +167,24 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
         <div className="d-flex flex-column gap-2">
           {days.map((d) => {
             const isToday = d.iso === todayIso
+            const isSelected = selectedDate && d.iso === selectedDate
+            let btnClass = 'btn-outline-secondary'
+            if (isSelected) {
+              btnClass = 'btn-primary'
+            } else if (isToday) {
+              btnClass = 'btn-outline-primary'
+            }
             return (
               <button
                 key={d.iso}
-                className={`btn btn-sm text-start ${isToday ? 'btn-primary' : 'btn-outline-primary'}`}
-                onClick={() => onSelectDate(d.iso)}
+                className={`btn btn-sm text-start ${btnClass}`}
+                onClick={() => {
+                  console.log('Date clicked:', d.iso, 'Current selected:', selectedDate)
+                  onSelectDate(d.iso)
+                }}
               >
                 <div className="small">{d.iso}</div>
-                <div className={isToday ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.75rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
+                <div className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.75rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
               </button>
             )
           })}

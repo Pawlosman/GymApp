@@ -22,7 +22,7 @@ export default function App() {
         <Login />
       ) : (
         <>
-          <Sidebar onSelectDate={(d) => setSelectedDate(d)} />
+          <Sidebar onSelectDate={(d) => setSelectedDate(d)} selectedDate={selectedDate} />
           <div style={{ flex: 1 }}>
             <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 sticky-top shadow-sm">
               <div className="container-fluid">
