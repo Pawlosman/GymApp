@@ -36,18 +36,6 @@ export default function Login() {
     setLoading(false)
   }
 
-  async function signUp() {
-    setError(null)
-    setLoading(true)
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
-    } else {
-      setError('Check your email for the confirmation link!')
-    }
-    setLoading(false)
-  }
-
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       signIn()
@@ -62,12 +50,12 @@ export default function Login() {
             <div className="card shadow-lg border-0">
               <div className="card-body p-5">
                 <div className="text-center mb-4">
-                  <h1 className="h3 mb-3 fw-bold text-primary">Gym App</h1>
+                  <h1 className="h3 mb-3 fw-bold text-primary">Sign In</h1>
                   <p className="text-muted">Track your workouts and progress</p>
                 </div>
 
                 {error && (
-                  <div className={`alert ${error.includes('Check your email') ? 'alert-info' : 'alert-danger'} alert-dismissible fade show`} role="alert">
+                  <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     {error}
                     <button type="button" className="btn-close" onClick={() => setError(null)}></button>
                   </div>
@@ -120,7 +108,7 @@ export default function Login() {
                     </div>
                   </div>
 
-                  <div className="d-grid gap-2 mb-3">
+                  <div className="d-grid gap-2">
                     <button
                       type="button"
                       className="btn btn-primary btn-lg"
@@ -135,19 +123,6 @@ export default function Login() {
                       ) : (
                         'Sign In'
                       )}
-                    </button>
-                  </div>
-
-                  <div className="text-center">
-                    <hr className="my-4" />
-                    <p className="text-muted mb-3">Don't have an account?</p>
-                    <button
-                      type="button"
-                      className="btn btn-outline-primary"
-                      onClick={signUp}
-                      disabled={loading || !email || !password}
-                    >
-                      Create Account
                     </button>
                   </div>
                 </form>
