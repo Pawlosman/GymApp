@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate training data with detailed exercise categories and specifications\n\n- Add LIFT, STRONG, UPPER, LOWER category labels to all exercises\n- Add exercise prefixes \\(A1, A2, B1, B2, B3, C1, C2, D1, D2\\) for workout structure\n- Include detailed specifications: rest times, intensity markers \\(EMOM, FFE\\), tempo \\(AMRAP\\)\n- Update rep schemes with variations \\(E/S, ranges, progressive sets\\)\n- Training 1: Jan/Mar/May/Jul/Sep/Nov\n- Training 2: Feb/Apr/Jun/Aug/Oct/Dec\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

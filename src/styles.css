@@ -1,12 +1,78 @@
+/* ===== Filament-inspired Dark/Light Mode Theme ===== */
+:root {
+  /* Amber primary colors */
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
+
+  /* Zinc gray colors */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --color-gray-900: #18181b;
+  --color-gray-950: #09090b;
+
+  /* Light mode (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: var(--color-gray-50);
+  --bg-tertiary: var(--color-gray-100);
+  --bg-sidebar: var(--color-gray-50);
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-muted: var(--color-gray-500);
+  --border-color: var(--color-gray-200);
+  --border-color-strong: var(--color-gray-300);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  /* Accent colors */
+  --accent-primary: var(--color-primary-500);
+  --accent-primary-hover: var(--color-primary-600);
+  --accent-primary-light: var(--color-primary-100);
+}
+
+[data-theme="dark"] {
+  /* Dark mode */
+  --bg-primary: var(--color-gray-900);
+  --bg-secondary: var(--color-gray-800);
+  --bg-tertiary: var(--color-gray-700);
+  --bg-sidebar: var(--color-gray-950);
+  --text-primary: var(--color-gray-100);
+  --text-secondary: var(--color-gray-400);
+  --text-muted: var(--color-gray-500);
+  --border-color: var(--color-gray-800);
+  --border-color-strong: var(--color-gray-700);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+
+  /* Accent colors adjusted for dark mode */
+  --accent-primary: var(--color-primary-500);
+  --accent-primary-hover: var(--color-primary-400);
+  --accent-primary-light: var(--color-primary-900);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  background-color: #f5f5f5;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 html, body, #root {
@@ -16,13 +82,13 @@ html, body, #root {
 .app {
   display: flex;
   height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--bg-secondary);
 }
 
 .app > aside {
   flex-shrink: 0;
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
 }
 
 .app > div {
@@ -34,7 +100,9 @@ html, body, #root {
 
 .navbar {
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  background-color: var(--bg-primary) !important;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workouts, .add-form input {
@@ -46,13 +114,144 @@ html, body, #root {
 }
 
 .plan {
-  background: #f8f9fb;
+  background: var(--bg-tertiary);
   padding: 8px;
   margin: 8px 0;
+  border-radius: 6px;
 }
 
 .planned ul {
   margin: 6px 0 0 16px;
+}
+
+/* Override Bootstrap components for theming */
+[data-theme="dark"] .card {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .card-header {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color);
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .card-header.bg-primary {
+  background-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: var(--bg-sidebar) !important;
+}
+
+[data-theme="dark"] .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .border-end {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: var(--bg-secondary);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-outline-primary {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+[data-theme="dark"] .btn-primary {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  background-color: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
+}
+
+[data-theme="dark"] .table {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .table thead th {
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .table tbody td {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .list-group-item {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .alert-info {
+  background-color: var(--color-primary-900);
+  border-color: var(--color-primary-800);
+  color: var(--color-primary-200);
+}
+
+[data-theme="dark"] .alert-danger {
+  background-color: #7f1d1d;
+  border-color: #991b1b;
+  color: #fecaca;
+}
+
+/* Theme toggle button styles */
+.theme-toggle {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1050;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--accent-primary);
+  border: 2px solid var(--border-color-strong);
+  box-shadow: 0 4px 6px var(--shadow-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--accent-primary-hover);
+  transform: scale(1.1);
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+  color: white;
 }
 
 /* Mobile Responsive */
@@ -69,9 +268,9 @@ html, body, #root {
     height: 100vh;
     z-index: 1000;
     transition: left 0.3s ease;
-    border-right: 1px solid #dee2e6;
+    border-right: 1px solid var(--border-color);
     overflow-y: auto;
-    background-color: white;
+    background-color: var(--bg-sidebar);
   }
 
   .app > aside.open {
@@ -80,6 +279,12 @@ html, body, #root {
 
   .card {
     margin-bottom: 1rem;
+  }
+
+  .theme-toggle {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
   }
 }
 
