@@ -268,6 +268,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           .eq('id', myRecord.id)
           .then(({ error }) => {
             if (error) console.error(error)
+            else clearPendingSync()
           })
       }
     }
@@ -277,6 +278,18 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
       ...prev,
       [exerciseName]: Math.max(1, (prev[exerciseName] || 1) - 1)
     }))
+  }
+
+  function clearPendingSync() {
+    const pendingKey = `pending_sync_${user?.id}`
+    const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
+    const updated = pending.filter(d => d !== selectedDate)
+    if (updated.length > 0) {
+      localStorage.setItem(pendingKey, JSON.stringify(updated))
+    } else {
+      localStorage.removeItem(pendingKey)
+      setPendingSync(false)
+    }
   }
 
   async function saveSetRecord(exerciseName, setIndex, reps, weight) {
@@ -310,10 +323,13 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     if (navigator.onLine) {
       try {
         if (myRecord && !String(myRecord.id).startsWith('temp_')) {
-          await supabase
+          const { error } = await supabase
             .from('workouts')
             .update({ set_records: setRecordsData })
             .eq('id', myRecord.id)
+          if (!error) {
+            clearPendingSync()
+          }
         } else {
           const { data, error } = await supabase
             .from('workouts')
@@ -337,6 +353,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
             )
             setWorkouts(finalWorkouts)
             saveToLocalStorage(finalWorkouts, false)
+            clearPendingSync()
           }
         }
       } catch (e) {
