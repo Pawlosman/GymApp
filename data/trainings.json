@@ -1,39 +1,73 @@
 {
   "trainings": {
     "Training 1": {
-      "months": ["January", "February", "May", "June", "September", "October"],
+      "months": ["January", "March", "May", "July", "September", "November"],
       "Tuesday": [
-        { "name": "Back Squat", "sets": 4, "reps": 6, "weight": 80 },
-        { "name": "Leg Press", "sets": 3, "reps": 10, "weight": 120 },
-        { "name": "Hamstring Curl", "sets": 3, "reps": 12, "weight": 40 }
+        { "name": "Barbell Floor Press", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "DB Offset Squat", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Barbell Incline Row", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Standing Good Morning", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Banded wood chop", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Standing Barbell Bicep Curl - Medium Grip", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Lat Pulldown", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Weighted Hip Thrust", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "X Band Walk", "sets": 3, "reps": 2, "weight": 0 }
       ],
       "Thursday": [
-        { "name": "Bench Press", "sets": 4, "reps": 6, "weight": 70 },
-        { "name": "Incline DB Press", "sets": 3, "reps": 8, "weight": 28 },
-        { "name": "Triceps Pushdown", "sets": 3, "reps": 12, "weight": 25 }
+        { "name": "Barbell Split Squat", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "3 Point row", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Glute Bridge", "sets": 4, "reps": 8, "weight": 0 },
+        { "name": "45° Incline Dumbbell Chest Press - Pronated Grip", "sets": 4, "reps": 8, "weight": 0 },
+        { "name": "Plank", "sets": 4, "reps": 40, "weight": 0 },
+        { "name": "Bench Press - Narrow Grip", "sets": 4, "reps": 15, "weight": 0 },
+        { "name": "DB Tricep Roll Backs", "sets": 4, "reps": 15, "weight": 0 },
+        { "name": "Goblet Squat 1.5", "sets": 4, "reps": 15, "weight": 0 },
+        { "name": "Low Walking Lunges", "sets": 4, "reps": 15, "weight": 0 }
       ],
       "Saturday": [
-        { "name": "Deadlift", "sets": 4, "reps": 5, "weight": 120 },
-        { "name": "Barbell Row", "sets": 3, "reps": 8, "weight": 60 },
-        { "name": "Pull-ups", "sets": 3, "reps": 8, "weight": 0 }
+        { "name": "trap bar RDL", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "ring press up", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Split Squat", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Pull Up", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Hammer Floor Press", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Plate Front Raise", "sets": 2, "reps": 8, "weight": 0 },
+        { "name": "DB Rear Fly", "sets": 2, "reps": 8, "weight": 0 },
+        { "name": "Sprinters Bridge", "sets": 3, "reps": 12, "weight": 0 },
+        { "name": "Banded Lying leg Curl", "sets": 3, "reps": 12, "weight": 0 }
       ]
     },
     "Training 2": {
-      "months": ["March", "April", "July", "August", "November", "December"],
+      "months": ["February", "April", "June", "August", "October", "December"],
       "Tuesday": [
-        { "name": "Front Squat", "sets": 4, "reps": 5, "weight": 70 },
-        { "name": "Bulgarian Split Squat", "sets": 3, "reps": 8, "weight": 30 },
-        { "name": "Leg Curl", "sets": 3, "reps": 12, "weight": 50 }
+        { "name": "Bench Press", "sets": 3, "reps": 5, "weight": 0 },
+        { "name": "FFE DB Split Squat", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "Pendlay Row", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Star side Plank", "sets": 3, "reps": 20, "weight": 0 },
+        { "name": "Goblet Squat", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "face pull", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Standing Dumbbell Bicep Curl - Pronated Grip", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Monster Walk with Mini-band", "sets": 1, "reps": 2, "weight": 0 },
+        { "name": "HIP THRUST HOLD", "sets": 1, "reps": 1, "weight": 0 }
       ],
       "Thursday": [
-        { "name": "Dumbbell Bench Press", "sets": 4, "reps": 8, "weight": 32 },
-        { "name": "Cable Fly", "sets": 3, "reps": 10, "weight": 20 },
-        { "name": "Rope Triceps Extension", "sets": 3, "reps": 12, "weight": 30 }
+        { "name": "Back Squat", "sets": 3, "reps": 5, "weight": 0 },
+        { "name": "Gorilla Row", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "Rack Pulls", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "ALT FLAT DB PRESS", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "Hammer Floor Press", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Single Dumbbell Overhead Triceps Extension", "sets": 3, "reps": 10, "weight": 0 },
+        { "name": "Barbell Calf Raise on Floor", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Bulgarian Split Squat with Dumbbells", "sets": 3, "reps": 8, "weight": 0 }
       ],
       "Saturday": [
-        { "name": "Trap Bar Deadlift", "sets": 4, "reps": 6, "weight": 140 },
-        { "name": "Seal Row", "sets": 3, "reps": 10, "weight": 50 },
-        { "name": "Assisted Pull-ups", "sets": 3, "reps": 10, "weight": -20 }
+        { "name": "Clean Grip Deadlift", "sets": 3, "reps": 5, "weight": 0 },
+        { "name": "Seated Dumbbell Shoulder Press - Pronated Grip", "sets": 3, "reps": 6, "weight": 0 },
+        { "name": "Barbell Lunge", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "Supinated DB bent over row", "sets": 3, "reps": 8, "weight": 0 },
+        { "name": "DB Cuban press", "sets": 3, "reps": 40, "weight": 0 },
+        { "name": "Landmine Twists", "sets": 3, "reps": 2, "weight": 0 },
+        { "name": "Prowler Push", "sets": 3, "reps": 1, "weight": 0 },
+        { "name": "Sprinter Bridge", "sets": 3, "reps": 30, "weight": 0 }
       ]
     }
   }
