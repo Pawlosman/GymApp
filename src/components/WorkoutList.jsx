@@ -173,7 +173,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                 <div className="card">
                   <div className="card-header bg-primary text-white">
                     <h5 className="mb-0">{exercise.name}</h5>
-                    <small>Target: {exercise.sets}x{exercise.reps} @ {exercise.weight}kg</small>
+                    <small>Target: {exercise.sets}x{exercise.reps}</small>
                   </div>
                   <div className="card-body">
                     <table className="table table-sm">
