@@ -64,7 +64,7 @@ export default function Sidebar({ onSelectDate }) {
       <>
         <button 
           className="btn btn-outline-primary position-fixed"
-          style={{ top: '70px', left: '10px', zIndex: 999 }}
+          style={{ top: '12px', left: '10px', zIndex: 999 }}
           onClick={() => setIsOpen(!isOpen)}
         >
           ☰ Menu

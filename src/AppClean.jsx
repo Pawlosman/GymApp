@@ -27,9 +27,9 @@ export default function App() {
           </div>
         ) : (
           <>
-            <nav className="navbar navbar-light bg-primary sticky-top">
+            <nav className="navbar navbar-light bg-primary sticky-top" style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
               <div className="container-fluid">
-                <span className="navbar-brand mb-0 h5 text-white">GymApp</span>
+                <span className="navbar-brand mb-0 h5 text-white" style={{ marginLeft: '50px' }}>GymApp</span>
                 <button 
                   className="btn btn-outline-light btn-sm"
                   onClick={async () => {

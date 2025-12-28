@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import trainingsData from '../../data/trainings.json'
 
-const TRAIN_DAYS = [2, 4, 6]
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -26,9 +25,11 @@ function getTrainingForMonth(monthIndex) {
 }
 
 export default function WorkoutList({ user, selectedDate: externalSelectedDate }) {
-  const [selectedDate, setSelectedDate] = useState(externalSelectedDate || isoDate(new Date()))
+  // Auto-detect today's date
+  const todayDate = isoDate(new Date())
+  const [selectedDate, setSelectedDate] = useState(todayDate)
   const [workouts, setWorkouts] = useState([])
-  const [setRecords, setSetRecords] = useState({})
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
 
   useEffect(() => {
     if (externalSelectedDate) setSelectedDate(externalSelectedDate)
@@ -49,17 +50,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
       .eq('date', selectedDate)
       .order('id', { ascending: true })
     if (error) console.error(error)
-    else {
-      setWorkouts(data || [])
-      // Initialize set records
-      const records = {}
-      data.forEach(w => {
-        if (!records[w.exercise_name]) {
-          records[w.exercise_name] = w.set_records || {}
-        }
-      })
-      setSetRecords(records)
-    }
+    else setWorkouts(data || [])
   }
 
   const dateObj = new Date(selectedDate + 'T00:00:00Z')
@@ -112,12 +103,20 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     }
   }
 
+  async function deleteWorkout(id) {
+    if (!user) return
+    const { error } = await supabase.from('workouts').delete().eq('id', id)
+    if (error) console.error(error)
+    else fetchWorkouts()
+    setDeleteConfirm(null)
+  }
+
   return (
     <div className="container-fluid p-4">
-      <h2>Workout for {selectedDate} ({weekday})</h2>
+      <h2 className="mb-4">Workout for {selectedDate} ({weekday})</h2>
 
       {exerciseTemplate.length === 0 ? (
-        <div className="alert alert-info">No training scheduled for {weekday}</div>
+        <div className="alert alert-info">No training scheduled for {weekday} (but you can still add exercises)</div>
       ) : (
         <div className="row g-4">
           {exerciseTemplate.map((exercise) => {
@@ -174,16 +173,45 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
         </div>
       )}
 
+      {deleteConfirm && (
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Delete Workout?</h5>
+                <button type="button" className="btn-close" onClick={() => setDeleteConfirm(null)}></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to delete this workout record?</p>
+                <p className="fw-bold mb-0">{deleteConfirm.exercise_name}</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setDeleteConfirm(null)}>Cancel</button>
+                <button type="button" className="btn btn-danger" onClick={() => deleteWorkout(deleteConfirm.id)}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {workouts.length > 0 && (
         <div className="mt-4">
           <h4>Recorded Workouts</h4>
           <div className="list-group">
             {workouts.map((w) => (
-              <div key={w.id} className="list-group-item">
-                <h6 className="mb-2">{w.exercise_name}</h6>
-                <small className="text-muted">
-                  {w.sets}x{w.reps} @ {w.weight}kg
-                </small>
+              <div key={w.id} className="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="mb-2">{w.exercise_name}</h6>
+                  <small className="text-muted">
+                    {w.sets}x{w.reps} @ {w.weight}kg
+                  </small>
+                </div>
+                <button 
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => setDeleteConfirm(w)}
+                >
+                  🗑 Delete
+                </button>
               </div>
             ))}
           </div>
