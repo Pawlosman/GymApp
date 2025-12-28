@@ -45,21 +45,21 @@
 
 [data-theme="dark"] {
   /* Dark mode */
-  --bg-primary: var(--color-gray-900);
-  --bg-secondary: var(--color-gray-800);
-  --bg-tertiary: var(--color-gray-700);
-  --bg-sidebar: var(--color-gray-950);
-  --text-primary: var(--color-gray-100);
-  --text-secondary: var(--color-gray-400);
-  --text-muted: var(--color-gray-500);
-  --border-color: var(--color-gray-800);
-  --border-color-strong: var(--color-gray-700);
-  --shadow-color: rgba(0, 0, 0, 0.5);
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #0f0f0f;
+  --bg-tertiary: #2a2a2a;
+  --bg-sidebar: #121212;
+  --text-primary: #e5e5e5;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  --border-color: #404040;
+  --border-color-strong: #525252;
+  --shadow-color: rgba(0, 0, 0, 0.7);
 
   /* Accent colors adjusted for dark mode */
-  --accent-primary: var(--color-primary-500);
-  --accent-primary-hover: var(--color-primary-400);
-  --accent-primary-light: var(--color-primary-900);
+  --accent-primary: #fbbf24;
+  --accent-primary-hover: #f59e0b;
+  --accent-primary-light: #92400e;
 }
 
 * {
@@ -126,24 +126,28 @@ html, body, #root {
 
 /* Override Bootstrap components for theming */
 [data-theme="dark"] .card {
-  background-color: var(--bg-primary);
-  border-color: var(--border-color);
-  color: var(--text-primary);
+  background-color: #1f1f1f;
+  border-color: #404040;
+  color: #e5e5e5;
 }
 
 [data-theme="dark"] .card-header {
-  background-color: var(--bg-tertiary) !important;
-  border-color: var(--border-color);
-  color: var(--text-primary) !important;
+  background-color: #2a2a2a !important;
+  border-color: #404040;
+  color: #e5e5e5 !important;
 }
 
 [data-theme="dark"] .card-header.bg-primary {
-  background-color: var(--accent-primary) !important;
-  color: white !important;
+  background-color: #d97706 !important;
+  color: #fafafa !important;
 }
 
 [data-theme="dark"] .bg-light {
-  background-color: var(--bg-sidebar) !important;
+  background-color: #0f0f0f !important;
+}
+
+[data-theme="dark"] .min-vh-100.bg-light {
+  background-color: #0f0f0f !important;
 }
 
 [data-theme="dark"] .text-muted {
@@ -160,50 +164,72 @@ html, body, #root {
 
 [data-theme="dark"] .form-control,
 [data-theme="dark"] .form-select {
-  background-color: var(--bg-tertiary);
-  border-color: var(--border-color);
-  color: var(--text-primary);
+  background-color: #2a2a2a;
+  border-color: #525252;
+  color: #e5e5e5;
 }
 
 [data-theme="dark"] .form-control:focus,
 [data-theme="dark"] .form-select:focus {
-  background-color: var(--bg-secondary);
-  border-color: var(--accent-primary);
-  color: var(--text-primary);
+  background-color: #333333;
+  border-color: #fbbf24;
+  color: #e5e5e5;
+  box-shadow: 0 0 0 0.2rem rgba(251, 191, 36, 0.25);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: #737373;
+}
+
+[data-theme="dark"] .form-label {
+  color: #d4d4d4;
 }
 
 [data-theme="dark"] .btn-outline-primary {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  color: #fbbf24;
+  border-color: #fbbf24;
+  background-color: transparent;
 }
 
 [data-theme="dark"] .btn-outline-primary:hover {
-  background-color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: white;
+  background-color: #fbbf24;
+  border-color: #fbbf24;
+  color: #18181b;
 }
 
 [data-theme="dark"] .btn-primary {
-  background-color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+  color: #18181b;
 }
 
 [data-theme="dark"] .btn-primary:hover {
-  background-color: var(--accent-primary-hover);
-  border-color: var(--accent-primary-hover);
+  background-color: #d97706;
+  border-color: #d97706;
+  color: #18181b;
+}
+
+[data-theme="dark"] .btn-primary:disabled {
+  background-color: #92400e;
+  border-color: #92400e;
+  color: #525252;
 }
 
 [data-theme="dark"] .table {
-  color: var(--text-primary);
+  color: #e5e5e5;
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .table thead th {
-  border-color: var(--border-color);
-  color: var(--text-secondary);
+  border-color: #404040;
+  color: #a3a3a3;
+  background-color: #1a1a1a;
 }
 
 [data-theme="dark"] .table tbody td {
-  border-color: var(--border-color);
+  border-color: #333333;
 }
 
 [data-theme="dark"] .list-group-item {
