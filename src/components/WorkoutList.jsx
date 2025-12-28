@@ -43,6 +43,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const todayDate = isoDate(new Date())
   const [selectedDate, setSelectedDate] = useState(todayDate)
   const [workouts, setWorkouts] = useState([])
+  const [lastWorkouts, setLastWorkouts] = useState([])
   const [setsCounts, setSetsCounts] = useState({})
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingSync, setPendingSync] = useState(false)
@@ -181,6 +182,29 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           setWorkouts(localData)
         }
       }
+    }
+
+    // Fetch last workout data for placeholders
+    fetchLastWorkouts()
+  }
+
+  async function fetchLastWorkouts() {
+    if (!user || !navigator.onLine) return
+
+    try {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', user.id)
+        .lt('date', selectedDate)
+        .order('date', { ascending: false })
+        .limit(50)
+
+      if (!error && data) {
+        setLastWorkouts(data)
+      }
+    } catch (e) {
+      console.error('Failed to fetch last workouts:', e)
     }
   }
 
@@ -395,6 +419,10 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
             const mySetRecords = myRecord?.set_records || {}
             const currentSets = setsCounts[exercise.name] || exercise.sets
 
+            // Find last workout for this exercise
+            const lastRecord = lastWorkouts.find(w => w.exercise_name === exercise.name)
+            const lastSetRecords = lastRecord?.set_records || {}
+
             return (
               <div key={exercise.name} className="col-md-6 col-lg-4">
                 <div className="card">
@@ -427,6 +455,10 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                       <tbody>
                         {Array.from({ length: currentSets }).map((_, setIndex) => {
                           const savedSet = mySetRecords[setIndex] || {}
+                          const lastSet = lastSetRecords[setIndex] || {}
+                          const hasUserReps = savedSet.reps !== undefined && savedSet.reps !== null
+                          const hasUserWeight = savedSet.weight !== undefined && savedSet.weight !== null
+
                           return (
                             <tr key={setIndex}>
                               <td><strong>{setIndex + 1}</strong></td>
@@ -434,8 +466,9 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
-                                  placeholder="Reps"
+                                  placeholder={lastSet.reps ? `${lastSet.reps}` : 'Reps'}
                                   defaultValue={savedSet.reps || ''}
+                                  style={hasUserReps ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
                                     const value = e.target.value ? Number(e.target.value) : null
                                     if (value !== null) {
@@ -448,8 +481,9 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
-                                  placeholder="Weight"
+                                  placeholder={lastSet.weight ? `${lastSet.weight}` : 'Weight'}
                                   defaultValue={savedSet.weight || ''}
+                                  style={hasUserWeight ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
                                     const value = e.target.value ? Number(e.target.value) : null
                                     if (value !== null) {
