@@ -38,6 +38,7 @@ function daysForMonth(yearMonth) {
 export default function Sidebar({ onSelectDate }) {
   const now = new Date()
   const defaultMonth = now.toISOString().slice(0, 7)
+  const todayIso = isoDate(now)
   const [month, setMonth] = useState(defaultMonth)
   const [isOpen, setIsOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -101,6 +102,7 @@ export default function Sidebar({ onSelectDate }) {
           currentTraining={currentTraining}
           trainingData={trainingData}
           onSelectDate={onSelectDate}
+          todayIso={todayIso}
         />
       </aside>
     )
@@ -131,6 +133,7 @@ export default function Sidebar({ onSelectDate }) {
         currentTraining={currentTraining}
         trainingData={trainingData}
         onSelectDate={handleSelectDate}
+        todayIso={todayIso}
       />
     </aside>
   )
@@ -144,7 +147,7 @@ export default function Sidebar({ onSelectDate }) {
   )
 }
 
-function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso }) {
   return (
     <>
       <h4 className="mb-4">
@@ -160,12 +163,19 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
         <label className="form-label fw-bold text-primary">{currentTraining}</label>
         <strong className="d-block mb-2">Training Days</strong>
         <div className="d-flex flex-column gap-2">
-          {days.map((d) => (
-            <button key={d.iso} className="btn btn-sm btn-outline-primary text-start" onClick={() => onSelectDate(d.iso)}>
-              <div className="small">{d.iso}</div>
-              <div className="text-muted" style={{ fontSize: '0.75rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
-            </button>
-          ))}
+          {days.map((d) => {
+            const isToday = d.iso === todayIso
+            return (
+              <button
+                key={d.iso}
+                className={`btn btn-sm text-start ${isToday ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => onSelectDate(d.iso)}
+              >
+                <div className="small">{d.iso}</div>
+                <div className={isToday ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.75rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -178,7 +188,7 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
             <em className="d-block text-secondary fw-bold">{day}</em>
             <ul className="small ps-3 mb-2">
               {trainingData[day].map((t, i) => (
-                <li key={i} className="text-muted">{t.name} — {t.sets}×{t.reps} @ {t.weight}kg</li>
+                <li key={i} className="text-muted">{t.name} — {t.sets}×{t.reps}</li>
               ))}
             </ul>
           </div>

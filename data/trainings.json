@@ -3,71 +3,71 @@
     "Training 1": {
       "months": ["January", "March", "May", "July", "September", "November"],
       "Tuesday": [
-        { "name": "A1 Barbell Floor Press", "category": "LIFT", "sets": 3, "reps": 6, "weight": 0, "rest": "90s" },
-        { "name": "A2 DB Offset Squat", "category": "LIFT", "sets": 3, "reps": "8 E/S", "weight": 0 },
-        { "name": "B1 Barbell Incline Row", "category": "STRONG", "sets": 3, "reps": 10, "weight": 0 },
-        { "name": "B2 Standing Good Morning", "category": "STRONG", "sets": 3, "reps": 10, "weight": 0 },
-        { "name": "B3 Banded wood chop", "category": "STRONG", "sets": 3, "reps": "10 E/S", "weight": 0 },
-        { "name": "C1 Standing Barbell Bicep Curl - Medium Grip", "category": "UPPER", "sets": "3-4", "reps": 10, "weight": 0, "rest": "60s" },
-        { "name": "C2 Lat Pulldown", "category": "UPPER", "sets": "3-4", "reps": 10, "weight": 0 },
-        { "name": "D1 Weighted Hip Thrust", "category": "LOWER", "sets": "3-4", "reps": "8-12", "weight": 0, "rest": "60s" },
-        { "name": "D2 X Band Walk", "category": "LOWER", "sets": "3-4", "reps": "2L", "weight": 0 }
+        { "name": "A1 Barbell Floor Press", "category": "LIFT", "sets": 3, "reps": 6, "rest": "90s" },
+        { "name": "A2 DB Offset Squat", "category": "LIFT", "sets": 3, "reps": "8 E/S" },
+        { "name": "B1 Barbell Incline Row", "category": "STRONG", "sets": 3, "reps": 10 },
+        { "name": "B2 Standing Good Morning", "category": "STRONG", "sets": 3, "reps": 10 },
+        { "name": "B3 Banded wood chop", "category": "STRONG", "sets": 3, "reps": "10 E/S" },
+        { "name": "C1 Standing Barbell Bicep Curl - Medium Grip", "category": "UPPER", "sets": "3-4", "reps": 10, "rest": "60s" },
+        { "name": "C2 Lat Pulldown", "category": "UPPER", "sets": "3-4", "reps": 10 },
+        { "name": "D1 Weighted Hip Thrust", "category": "LOWER", "sets": "3-4", "reps": "8-12", "rest": "60s" },
+        { "name": "D2 X Band Walk", "category": "LOWER", "sets": "3-4", "reps": "2L" }
       ],
       "Thursday": [
-        { "name": "A1 Barbell Split Squat", "category": "LIFT", "sets": 3, "reps": "6 E/S", "weight": 0, "rest": "90s" },
-        { "name": "A2 3 Point row", "category": "LIFT", "sets": 3, "reps": "8 E/S", "weight": 0 },
-        { "name": "B1 Glute Bridge", "category": "STRONG", "sets": 4, "reps": 8, "weight": 0, "intensity": "EMOM" },
-        { "name": "B2 45° Incline Dumbbell Chest Press - Pronated Grip", "category": "STRONG", "sets": 4, "reps": 8, "weight": 0 },
-        { "name": "B3 Plank", "category": "STRONG", "sets": 4, "reps": "40s", "weight": 0 },
-        { "name": "C1 Bench Press - Narrow Grip", "category": "UPPER", "sets": 4, "reps": "15, 12, 9, 6", "weight": 0 },
-        { "name": "C2 DB Tricep Roll Backs", "category": "UPPER", "sets": 4, "reps": "15, 12, 9, 6", "weight": 0 },
-        { "name": "D1 Goblet Squat 1.5", "category": "LOWER", "sets": 4, "reps": "15, 12, 9, 6", "weight": 0, "rest": "60s" },
-        { "name": "D2 Low Walking Lunges", "category": "LOWER", "sets": 4, "reps": "15, 12, 9, 6", "weight": 0 }
+        { "name": "A1 Barbell Split Squat", "category": "LIFT", "sets": 3, "reps": "6 E/S", "rest": "90s" },
+        { "name": "A2 3 Point row", "category": "LIFT", "sets": 3, "reps": "8 E/S" },
+        { "name": "B1 Glute Bridge", "category": "STRONG", "sets": 4, "reps": 8, "intensity": "EMOM" },
+        { "name": "B2 45° Incline Dumbbell Chest Press - Pronated Grip", "category": "STRONG", "sets": 4, "reps": 8 },
+        { "name": "B3 Plank", "category": "STRONG", "sets": 4, "reps": "40s" },
+        { "name": "C1 Bench Press - Narrow Grip", "category": "UPPER", "sets": 4, "reps": "15, 12, 9, 6" },
+        { "name": "C2 DB Tricep Roll Backs", "category": "UPPER", "sets": 4, "reps": "15, 12, 9, 6" },
+        { "name": "D1 Goblet Squat 1.5", "category": "LOWER", "sets": 4, "reps": "15, 12, 9, 6", "rest": "60s" },
+        { "name": "D2 Low Walking Lunges", "category": "LOWER", "sets": 4, "reps": "15, 12, 9, 6" }
       ],
       "Saturday": [
-        { "name": "A1 trap bar RDL", "category": "LIFT", "sets": 3, "reps": 6, "weight": 0, "rest": "90s" },
-        { "name": "A2 ring press up", "category": "LIFT", "sets": 3, "reps": "8-12", "weight": 0 },
-        { "name": "B1 Split Squat", "category": "STRONG", "sets": 3, "reps": 10, "weight": 0, "rest": "60s", "intensity": "FFE" },
-        { "name": "B2 Pull Up", "category": "STRONG", "sets": 3, "reps": 10, "weight": 0 },
-        { "name": "B3 Hammer Floor Press", "category": "STRONG", "sets": 3, "reps": 10, "weight": 0, "intensity": "Neutral" },
-        { "name": "C1 Plate Front Raise", "category": "UPPER", "sets": "2-3", "reps": "8-6-MAX", "weight": 0, "rest": "60s" },
-        { "name": "C2 DB Rear Fly", "category": "UPPER", "sets": "2-3", "reps": "8-6-MAX", "weight": 0 },
-        { "name": "D1 Sprinters Bridge", "category": "LOWER", "sets": "3-4", "reps": 12, "weight": 0 },
-        { "name": "D2 Banded Lying leg Curl", "category": "LOWER", "sets": "3-4", "reps": 12, "weight": 0 }
+        { "name": "A1 trap bar RDL", "category": "LIFT", "sets": 3, "reps": 6, "rest": "90s" },
+        { "name": "A2 ring press up", "category": "LIFT", "sets": 3, "reps": "8-12" },
+        { "name": "B1 Split Squat", "category": "STRONG", "sets": 3, "reps": 10, "rest": "60s", "intensity": "FFE" },
+        { "name": "B2 Pull Up", "category": "STRONG", "sets": 3, "reps": 10 },
+        { "name": "B3 Hammer Floor Press", "category": "STRONG", "sets": 3, "reps": 10, "intensity": "Neutral" },
+        { "name": "C1 Plate Front Raise", "category": "UPPER", "sets": "2-3", "reps": "8-6-MAX", "rest": "60s" },
+        { "name": "C2 DB Rear Fly", "category": "UPPER", "sets": "2-3", "reps": "8-6-MAX" },
+        { "name": "D1 Sprinters Bridge", "category": "LOWER", "sets": "3-4", "reps": 12 },
+        { "name": "D2 Banded Lying leg Curl", "category": "LOWER", "sets": "3-4", "reps": 12 }
       ]
     },
     "Training 2": {
       "months": ["February", "April", "June", "August", "October", "December"],
       "Tuesday": [
-        { "name": "A1 Bench Press", "category": "LIFT", "sets": 3, "reps": "5-3", "weight": 0 },
-        { "name": "A2 FFE DB Split Squat", "category": "LIFT", "sets": 3, "reps": "6 E/S", "weight": 0, "rest": "90s" },
-        { "name": "B1 Pendlay Row", "category": "STRONG", "sets": 3, "reps": 8, "weight": 0 },
-        { "name": "B2 Star side Plank", "category": "STRONG", "sets": 3, "reps": "20s E/S", "weight": 0 },
-        { "name": "B3 Goblet Squat", "category": "STRONG", "sets": 3, "reps": 8, "weight": 0, "rest": "60s" },
-        { "name": "C1 face pull", "category": "UPPER", "sets": 3, "reps": 8, "weight": 0, "time": "12 mins", "tempo": "AMRAP" },
-        { "name": "C2 Standing Dumbbell Bicep Curl - Pronated Grip", "category": "UPPER", "sets": 3, "reps": 8, "weight": 0, "time": "12 mins", "tempo": "AMRAP" },
-        { "name": "D1 Monster Walk with Mini-band", "category": "LOWER", "sets": 1, "reps": "2L", "weight": 0, "time": "12 Mins", "tempo": "AMRAP" },
-        { "name": "D2 HIP THRUST HOLD", "category": "LOWER", "sets": 1, "reps": 1, "weight": 0, "time": "12 Mins", "tempo": "AMRAP" }
+        { "name": "A1 Bench Press", "category": "LIFT", "sets": 3, "reps": "5-3" },
+        { "name": "A2 FFE DB Split Squat", "category": "LIFT", "sets": 3, "reps": "6 E/S", "rest": "90s" },
+        { "name": "B1 Pendlay Row", "category": "STRONG", "sets": 3, "reps": 8 },
+        { "name": "B2 Star side Plank", "category": "STRONG", "sets": 3, "reps": "20s E/S" },
+        { "name": "B3 Goblet Squat", "category": "STRONG", "sets": 3, "reps": 8, "rest": "60s" },
+        { "name": "C1 face pull", "category": "UPPER", "sets": 3, "reps": 8, "time": "12 mins", "tempo": "AMRAP" },
+        { "name": "C2 Standing Dumbbell Bicep Curl - Pronated Grip", "category": "UPPER", "sets": 3, "reps": 8, "time": "12 mins", "tempo": "AMRAP" },
+        { "name": "D1 Monster Walk with Mini-band", "category": "LOWER", "sets": 1, "reps": "2L", "time": "12 Mins", "tempo": "AMRAP" },
+        { "name": "D2 HIP THRUST HOLD", "category": "LOWER", "sets": 1, "reps": 1, "time": "12 Mins", "tempo": "AMRAP" }
       ],
       "Thursday": [
-        { "name": "A1 Back Squat", "category": "LIFT", "sets": 3, "reps": "5-3", "weight": 0 },
-        { "name": "A2 Gorilla Row", "category": "LIFT", "sets": 3, "reps": "6 E/S", "weight": 0, "rest": "90s" },
-        { "name": "B1 Rack Pulls", "category": "STRONG", "sets": 3, "reps": 10, "weight": 0 },
-        { "name": "B2 ALT FLAT DB PRESS", "category": "STRONG", "sets": 3, "reps": "6-8 E/S", "weight": 0, "rest": "60s" },
-        { "name": "C1 Hammer Floor Press", "category": "UPPER", "sets": 3, "reps": 10, "weight": 0 },
-        { "name": "C2 Single Dumbbell Overhead Triceps Extension", "category": "UPPER", "sets": 3, "reps": 10, "weight": 0, "rest": "60s" },
-        { "name": "D1 Barbell Calf Raise on Floor", "category": "LOWER", "sets": 3, "reps": 8, "weight": 0 },
-        { "name": "D2 Bulgarian Split Squat with Dumbbells", "category": "LOWER", "sets": 3, "reps": "8 E/S", "weight": 0, "rest": "60s" }
+        { "name": "A1 Back Squat", "category": "LIFT", "sets": 3, "reps": "5-3" },
+        { "name": "A2 Gorilla Row", "category": "LIFT", "sets": 3, "reps": "6 E/S", "rest": "90s" },
+        { "name": "B1 Rack Pulls", "category": "STRONG", "sets": 3, "reps": 10 },
+        { "name": "B2 ALT FLAT DB PRESS", "category": "STRONG", "sets": 3, "reps": "6-8 E/S", "rest": "60s" },
+        { "name": "C1 Hammer Floor Press", "category": "UPPER", "sets": 3, "reps": 10 },
+        { "name": "C2 Single Dumbbell Overhead Triceps Extension", "category": "UPPER", "sets": 3, "reps": 10, "rest": "60s" },
+        { "name": "D1 Barbell Calf Raise on Floor", "category": "LOWER", "sets": 3, "reps": 8 },
+        { "name": "D2 Bulgarian Split Squat with Dumbbells", "category": "LOWER", "sets": 3, "reps": "8 E/S", "rest": "60s" }
       ],
       "Saturday": [
-        { "name": "A1 Clean Grip Deadlift", "category": "LIFT", "sets": 3, "reps": "5-3", "weight": 0 },
-        { "name": "A2 Seated Dumbbell Shoulder Press - Pronated Grip", "category": "LIFT", "sets": 3, "reps": 6, "weight": 0, "rest": "90s" },
-        { "name": "B1 Barbell Lunge", "category": "STRONG", "sets": 3, "reps": "8 E/S", "weight": 0 },
-        { "name": "B2 Supinated DB bent over row", "category": "STRONG", "sets": 3, "reps": 8, "weight": 0, "rest": "60s" },
-        { "name": "C1 DB Cuban press", "category": "UPPER", "sets": 3, "reps": "40s", "weight": 0 },
-        { "name": "C2 Landmine Twists", "category": "UPPER", "sets": 3, "reps": "2L", "weight": 0 },
-        { "name": "D1 Prowler Push", "category": "LOWER", "sets": 3, "reps": "1-2L", "weight": 0 },
-        { "name": "D2 Sprinter Bridge", "category": "LOWER", "sets": 3, "reps": "30-40s", "weight": 0 }
+        { "name": "A1 Clean Grip Deadlift", "category": "LIFT", "sets": 3, "reps": "5-3" },
+        { "name": "A2 Seated Dumbbell Shoulder Press - Pronated Grip", "category": "LIFT", "sets": 3, "reps": 6, "rest": "90s" },
+        { "name": "B1 Barbell Lunge", "category": "STRONG", "sets": 3, "reps": "8 E/S" },
+        { "name": "B2 Supinated DB bent over row", "category": "STRONG", "sets": 3, "reps": 8, "rest": "60s" },
+        { "name": "C1 DB Cuban press", "category": "UPPER", "sets": 3, "reps": "40s" },
+        { "name": "C2 Landmine Twists", "category": "UPPER", "sets": 3, "reps": "2L" },
+        { "name": "D1 Prowler Push", "category": "LOWER", "sets": 3, "reps": "1-2L" },
+        { "name": "D2 Sprinter Bridge", "category": "LOWER", "sets": 3, "reps": "30-40s" }
       ]
     }
   }
