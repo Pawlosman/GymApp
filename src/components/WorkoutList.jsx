@@ -30,7 +30,8 @@ function formatDateDisplay(isoDateStr) {
 function getTrainingForMonth(monthIndex) {
   const monthName = MONTH_NAMES[monthIndex]
   for (const [trainingName, training] of Object.entries(trainingsData.trainings)) {
-    if (training.months.includes(monthName)) {
+    const months = (training.months || []).map(m => String(m).trim())
+    if (months.includes(monthName)) {
       return { trainingName, training }
     }
   }
@@ -66,14 +67,43 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     else setWorkouts(data || [])
   }
 
-  const [sy, sm, sd] = selectedDate.split('-').map(Number)
-  const localDateObj = new Date(sy, sm - 1, sd)
+  // support several input formats for selectedDate (ISO or dd/mm/yyyy or mm/dd/yyyy)
+  function parseSelectedDate(str) {
+    if (!str) return new Date()
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const [y, m, d] = str.split('-').map(Number)
+      return new Date(y, m - 1, d)
+    }
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+      const [a, b, c] = str.split('/').map(Number)
+      // prefer day/month/year (European) if ambiguous
+      const day = a
+      const month = b
+      const year = c
+      return new Date(year, month - 1, day)
+    }
+    // fallback to Date constructor
+    const d = new Date(str)
+    if (!isNaN(d)) return d
+    return new Date()
+  }
+
+  const localDateObj = parseSelectedDate(selectedDate)
   const monthIndex = localDateObj.getMonth()
   const weekday = WEEKDAY_NAMES[localDateObj.getDay()]
   const dateDisplay = formatDateDisplay(selectedDate)
   const trainingInfo = getTrainingForMonth(monthIndex)
   const training = trainingInfo?.training
-  const exerciseTemplate = training?.[weekday] || []
+  let exerciseTemplate = []
+  if (training) {
+    // try exact match, then try short-name match (Tue -> Tuesday or vice-versa)
+    if (training[weekday]) exerciseTemplate = training[weekday]
+    else {
+      const lower = weekday.toLowerCase()
+      const foundKey = Object.keys(training).find(k => k.toLowerCase() === lower || k.toLowerCase().startsWith(lower.slice(0,3)))
+      if (foundKey) exerciseTemplate = training[foundKey]
+    }
+  }
 
   async function saveSetRecord(exerciseName, setIndex, reps, weight) {
     if (!user) return alert('Sign in first')

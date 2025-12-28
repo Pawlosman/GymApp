@@ -1,7 +1,7 @@
 {
   "trainings": {
     "Training 1": {
-      "months": ["January", "February"],
+      "months": ["January", "February", "May", "June", "September", "October"],
       "Tuesday": [
         { "name": "Back Squat", "sets": 4, "reps": 6, "weight": 80 },
         { "name": "Leg Press", "sets": 3, "reps": 10, "weight": 120 },
@@ -19,7 +19,7 @@
       ]
     },
     "Training 2": {
-      "months": ["March", "April"],
+      "months": ["March", "April", "July", "August", "November", "December"],
       "Tuesday": [
         { "name": "Front Squat", "sets": 4, "reps": 5, "weight": 70 },
         { "name": "Bulgarian Split Squat", "sets": 3, "reps": 8, "weight": 30 },

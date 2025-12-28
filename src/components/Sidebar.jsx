@@ -44,7 +44,9 @@ export default function Sidebar({ onSelectDate }) {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+      if (!mobile) setIsOpen(false)
     }
     window.addEventListener('resize', handleResize)
     // listen for global toggle event (from navbar)
@@ -88,7 +90,23 @@ export default function Sidebar({ onSelectDate }) {
     />
   ) : null
 
-  // Sidebar element (slides in on mobile)
+  // Sidebar element: fixed sliding on mobile, static on wide screens
+  if (!isMobile) {
+    return (
+      <aside className="bg-light border-end" style={{ width: '280px', minHeight: '100vh', padding: '20px' }}>
+        <SidebarContent
+          month={month}
+          setMonth={setMonth}
+          days={days}
+          currentTraining={currentTraining}
+          trainingData={trainingData}
+          onSelectDate={onSelectDate}
+        />
+      </aside>
+    )
+  }
+
+  // mobile: overlay + slide-in aside
   const asideEl = (
     <aside
       className="bg-light border-end position-fixed h-100 overflow-y-auto"
@@ -96,18 +114,16 @@ export default function Sidebar({ onSelectDate }) {
         width: '280px',
         padding: '20px',
         zIndex: 1100,
-        left: isOpen || !isMobile ? 0 : '-280px',
+        left: isOpen ? 0 : '-280px',
         transition: 'left 0.25s ease',
         top: 0
       }}
     >
-      {isMobile && (
-        <button
-          className="btn-close mb-3"
-          onClick={() => setIsOpen(false)}
-          aria-label="Close"
-        ></button>
-      )}
+      <button
+        className="btn-close mb-3"
+        onClick={() => setIsOpen(false)}
+        aria-label="Close"
+      ></button>
       <SidebarContent
         month={month}
         setMonth={setMonth}
