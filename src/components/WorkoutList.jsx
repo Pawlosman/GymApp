@@ -431,6 +431,21 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
             return (
               <div key={exercise.name} className="col-md-6 col-lg-4">
                 <div className="card">
+                  {exercise.image && (
+                    <img
+                      src={`/exercises/${exercise.image}`}
+                      alt={exercise.name}
+                      className="card-img-top"
+                      style={{
+                        height: '200px',
+                        objectFit: 'cover',
+                        backgroundColor: '#f8f9fa'
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none'
+                      }}
+                    />
+                  )}
                   <div className="card-header bg-primary text-white">
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
