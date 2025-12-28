@@ -35,7 +35,6 @@ export default function Sidebar({ onSelectDate }) {
   const now = new Date()
   const defaultMonth = now.toISOString().slice(0, 7)
   const [month, setMonth] = useState(defaultMonth)
-  const [trainingType, setTrainingType] = useState(null)
   const [isOpen, setIsOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
@@ -50,9 +49,8 @@ export default function Sidebar({ onSelectDate }) {
   const days = daysForMonth(month)
   const [y, m] = month.split('-').map(Number)
   const trainingInfo = getTrainingForMonth(m - 1)
-  const defaultTraining = trainingInfo?.trainingName || 'Training 1'
-  const currentTraining = trainingType || defaultTraining
-  const trainingData = trainingsData.trainings[currentTraining]
+  const currentTraining = trainingInfo?.trainingName || 'Training 1'
+  const trainingData = trainingInfo?.training
 
   const handleSelectDate = (date) => {
     onSelectDate(date)
@@ -95,8 +93,6 @@ export default function Sidebar({ onSelectDate }) {
           <SidebarContent 
             month={month}
             setMonth={setMonth}
-            trainingType={trainingType}
-            setTrainingType={setTrainingType}
             days={days}
             currentTraining={currentTraining}
             trainingData={trainingData}
@@ -113,8 +109,6 @@ export default function Sidebar({ onSelectDate }) {
       <SidebarContent 
         month={month}
         setMonth={setMonth}
-        trainingType={trainingType}
-        setTrainingType={setTrainingType}
         days={days}
         currentTraining={currentTraining}
         trainingData={trainingData}
@@ -124,7 +118,7 @@ export default function Sidebar({ onSelectDate }) {
   )
 }
 
-function SidebarContent({ month, setMonth, trainingType, setTrainingType, days, currentTraining, trainingData, onSelectDate }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate }) {
   return (
     <>
       <h4 className="mb-4">
@@ -132,19 +126,12 @@ function SidebarContent({ month, setMonth, trainingType, setTrainingType, days, 
       </h4>
 
       <div className="mb-4">
-        <label className="form-label fw-bold">Training Type</label>
-        <select className="form-select form-select-sm" value={currentTraining} onChange={(e) => setTrainingType(e.target.value)}>
-          <option value="Training 1">Training 1</option>
-          <option value="Training 2">Training 2</option>
-        </select>
-      </div>
-
-      <div className="mb-4">
         <label className="form-label fw-bold">Month</label>
         <input type="month" className="form-control form-control-sm" value={month} onChange={(e) => setMonth(e.target.value)} />
       </div>
 
       <div className="mb-4">
+        <label className="form-label fw-bold text-primary">{currentTraining}</label>
         <strong className="d-block mb-2">Training Days</strong>
         <div className="d-flex flex-column gap-2">
           {days.map((d) => (
@@ -160,7 +147,7 @@ function SidebarContent({ month, setMonth, trainingType, setTrainingType, days, 
 
       <div>
         <strong className="d-block mb-3">Templates ({currentTraining})</strong>
-        {['Tuesday', 'Thursday', 'Saturday'].map((day) => (
+        {trainingData && ['Tuesday', 'Thursday', 'Saturday'].map((day) => (
           <div key={day} className="mb-3">
             <em className="d-block text-secondary fw-bold">{day}</em>
             <ul className="small ps-3 mb-2">

@@ -4,14 +4,24 @@ import trainingsData from '../../data/trainings.json'
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const DAY_NUMBERS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 function isoDate(date) {
   return date.toISOString().slice(0, 10)
 }
 
-function getWeekdayName(isoDate) {
-  const date = new Date(isoDate + 'T00:00:00Z')
+function getWeekdayName(isoDateStr) {
+  const date = new Date(isoDateStr + 'T00:00:00Z')
   return WEEKDAY_NAMES[date.getUTCDay()]
+}
+
+function formatDateDisplay(isoDateStr) {
+  const date = new Date(isoDateStr + 'T00:00:00Z')
+  const day = date.getUTCDate()
+  const month = date.getUTCMonth() + 1
+  const year = date.getUTCFullYear()
+  const dayName = DAY_NUMBERS[date.getUTCDay()]
+  return `${dayName} ${day}/${month}/${year}`
 }
 
 function getTrainingForMonth(monthIndex) {
@@ -56,6 +66,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const dateObj = new Date(selectedDate + 'T00:00:00Z')
   const monthIndex = dateObj.getUTCMonth()
   const weekday = getWeekdayName(selectedDate)
+  const dateDisplay = formatDateDisplay(selectedDate)
   const trainingInfo = getTrainingForMonth(monthIndex)
   const training = trainingInfo?.training
   const exerciseTemplate = training?.[weekday] || []
@@ -113,10 +124,10 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
 
   return (
     <div className="container-fluid p-4">
-      <h2 className="mb-4">Workout for {selectedDate} ({weekday})</h2>
+      <h2 className="mb-4">{dateDisplay}</h2>
 
       {exerciseTemplate.length === 0 ? (
-        <div className="alert alert-info">No training scheduled for {weekday} (but you can still add exercises)</div>
+        <div className="alert alert-info">No training scheduled for {weekday}</div>
       ) : (
         <div className="row g-4">
           {exerciseTemplate.map((exercise) => {
