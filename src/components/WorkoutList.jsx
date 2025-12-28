@@ -123,7 +123,34 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     }))
   }
 
-  function removeSet(exerciseName) {
+  function removeSet(exerciseName, setIndex) {
+    // Remove the specific set from the database
+    const myRecord = workouts.find(w => w.exercise_name === exerciseName)
+    if (myRecord?.set_records) {
+      const updatedSetRecords = { ...myRecord.set_records }
+      delete updatedSetRecords[setIndex]
+
+      // Reindex remaining sets
+      const reindexed = {}
+      Object.keys(updatedSetRecords)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .forEach((oldIndex, newIndex) => {
+          reindexed[newIndex] = updatedSetRecords[oldIndex]
+        })
+
+      // Update database
+      supabase
+        .from('workouts')
+        .update({ set_records: reindexed })
+        .eq('id', myRecord.id)
+        .then(({ error }) => {
+          if (error) console.error(error)
+          else fetchWorkouts()
+        })
+    }
+
+    // Decrease the count
     setSetsCounts(prev => ({
       ...prev,
       [exerciseName]: Math.max(1, (prev[exerciseName] || 1) - 1)
@@ -203,30 +230,14 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                         <h5 className="mb-0">{exercise.name}</h5>
                         <small>Target: {exercise.sets}x{exercise.reps}</small>
                       </div>
-                      <div style={{ display: 'flex', gap: '4px' }}>
-                        <button
-                          className="btn btn-warning"
-                          onClick={() => {
-                            console.log('Remove set clicked for', exercise.name)
-                            removeSet(exercise.name)
-                          }}
-                          title="Remove set"
-                          style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
-                        >
-                          −
-                        </button>
-                        <button
-                          className="btn btn-success"
-                          onClick={() => {
-                            console.log('Add set clicked for', exercise.name)
-                            addSet(exercise.name)
-                          }}
-                          title="Add set"
-                          style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
-                        >
-                          +
-                        </button>
-                      </div>
+                      <button
+                        className="btn btn-success"
+                        onClick={() => addSet(exercise.name)}
+                        title="Add set"
+                        style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                   <div className="card-body">
@@ -236,6 +247,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                           <th>Set</th>
                           <th>Reps</th>
                           <th>Weight (kg)</th>
+                          <th style={{ width: '40px' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -271,6 +283,16 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                     }
                                   }}
                                 />
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-sm btn-outline-danger"
+                                  onClick={() => removeSet(exercise.name, setIndex)}
+                                  title="Remove this set"
+                                  style={{ padding: '2px 6px', fontSize: '14px' }}
+                                >
+                                  🗑
+                                </button>
                               </td>
                             </tr>
                           )
