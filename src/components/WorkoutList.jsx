@@ -185,29 +185,42 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.from({ length: exercise.sets }).map((_, setIndex) => (
-                          <tr key={setIndex}>
-                            <td><strong>{setIndex + 1}</strong></td>
-                            <td>
-                              <input
-                                type="number"
-                                className="form-control form-control-sm"
-                                placeholder="Reps"
-                                defaultValue={''}
-                                onBlur={(e) => saveSetRecord(exercise.name, setIndex, Number(e.target.value), mySetRecords[setIndex]?.weight)}
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="number"
-                                className="form-control form-control-sm"
-                                placeholder="Weight"
-                                defaultValue={''}
-                                onBlur={(e) => saveSetRecord(exercise.name, setIndex, mySetRecords[setIndex]?.reps, Number(e.target.value))}
-                              />
-                            </td>
-                          </tr>
-                        ))}
+                        {Array.from({ length: exercise.sets }).map((_, setIndex) => {
+                          const savedSet = mySetRecords[setIndex] || {}
+                          return (
+                            <tr key={setIndex}>
+                              <td><strong>{setIndex + 1}</strong></td>
+                              <td>
+                                <input
+                                  type="number"
+                                  className="form-control form-control-sm"
+                                  placeholder="Reps"
+                                  defaultValue={savedSet.reps || ''}
+                                  onBlur={(e) => {
+                                    const value = e.target.value ? Number(e.target.value) : null
+                                    if (value !== null) {
+                                      saveSetRecord(exercise.name, setIndex, value, savedSet.weight || 0)
+                                    }
+                                  }}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  className="form-control form-control-sm"
+                                  placeholder="Weight"
+                                  defaultValue={savedSet.weight || ''}
+                                  onBlur={(e) => {
+                                    const value = e.target.value ? Number(e.target.value) : null
+                                    if (value !== null) {
+                                      saveSetRecord(exercise.name, setIndex, savedSet.reps || 0, value)
+                                    }
+                                  }}
+                                />
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>
