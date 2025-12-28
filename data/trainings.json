@@ -46,7 +46,7 @@
         { "name": "B3 Goblet Squat", "category": "STRONG", "sets": 3, "reps": 8, "rest": "60s", "image": "T2B3TUESDAY.jpg" },
         { "name": "C1 Face Pull", "category": "UPPER", "sets": 3, "reps": 8, "time": "12 mins", "tempo": "AMRAP", "image": "T2C1TUESDAY.jpg" },
         { "name": "C2 Standing Dumbbell Bicep Curl - Pronated Grip", "category": "UPPER", "sets": 3, "reps": 8, "time": "12 mins", "tempo": "AMRAP", "image": "T2C2TUESDAY.jpg" },
-        { "name": "D1 Monster Walk with Mini-band", "category": "LOWER", "sets": 8, "reps": "2L", "time": "12 Mins", "tempo": "AMRAP", "image": "T2D1TUESDAY.jpg" },
+        { "name": "D1 Monster Walk with Mini-band", "category": "LOWER", "sets": 3, "reps": "2L", "time": "12 Mins", "tempo": "AMRAP", "image": "T2D1TUESDAY.jpg" },
         { "name": "D2 Hip Thrust Hold", "category": "LOWER", "sets": 3, "reps": 8, "time": "12 Mins", "tempo": "AMRAP", "image": "T2D2TUESDAY.jpg" }
       ],
       "Thursday": [
@@ -65,7 +65,7 @@
         { "name": "B1 Barbell Lunge", "category": "STRONG", "sets": 3, "reps": "8 E/S", "image": "T2B1SATURDAY.jpg" },
         { "name": "B2 Supinated DB bent over row", "category": "STRONG", "sets": 3, "reps": 8, "rest": "60s", "image": "T2B2SATURDAY.jpg" },
         { "name": "C1 DB Cuban press", "category": "UPPER", "sets": 3, "reps": "40s", "image": "T2C1SATURDAY.jpg" },
-        { "name": "C2 Cable Woodchoppers", "category": "UPPER", "sets": 3, "reps": "2L", "image": "T2C2SATURDAY.jpg" },
+        { "name": "C2 Cable Woodchoppers", "category": "UPPER", "sets": 3, "reps": "8", "image": "T2C2SATURDAY.jpg" },
         { "name": "D1 Prowler Push", "category": "LOWER", "sets": 3, "reps": "1-2L", "image": "T2D1SATURDAY.jpg" },
         { "name": "D2 Sprinter Bridge", "category": "LOWER", "sets": 3, "reps": "30-40s", "image": "T2D2SATURDAY.jpg" }
       ]
