@@ -61,64 +61,64 @@ export default function Sidebar({ onSelectDate }) {
     if (isMobile) setIsOpen(false)
   }
 
-  if (isMobile) {
-    return (
-      <>
-        <button 
-          className="btn btn-outline-primary position-fixed"
-          style={{ top: '12px', left: '10px', zIndex: 999 }}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          ☰ Menu
-        </button>
-        {isOpen && (
-          <div 
-            className="position-fixed top-0 start-0 w-100 h-100"
-            style={{ backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 998 }}
-            onClick={() => setIsOpen(false)}
-          />
-        )}
-        <aside 
-          className="bg-light border-end position-fixed h-100 overflow-y-auto"
-          style={{ 
-            width: '280px', 
-            padding: '20px',
-            zIndex: 1000,
-            left: isOpen ? 0 : '-280px',
-            transition: 'left 0.3s ease',
-            top: 0
-          }}
-        >
-          <button 
-            className="btn-close mb-3"
-            onClick={() => setIsOpen(false)}
-            aria-label="Close"
-          ></button>
-          <SidebarContent 
-            month={month}
-            setMonth={setMonth}
-            days={days}
-            currentTraining={currentTraining}
-            trainingData={trainingData}
-            onSelectDate={handleSelectDate}
-          />
-        </aside>
-      </>
-    )
-  }
+  // Always render a visible toggle so user can open sidebar on smaller screens
+  const toggleButton = (
+    <button
+      className="btn btn-outline-primary position-fixed"
+      style={{ top: '12px', left: '10px', zIndex: 1100 }}
+      onClick={() => setIsOpen(!isOpen)}
+      aria-label="Toggle sidebar"
+    >
+      ☰
+    </button>
+  )
 
-  // Desktop view
-  return (
-    <aside className="bg-light border-end" style={{ width: '280px', minHeight: '100vh', overflowY: 'auto', padding: '20px' }}>
-      <SidebarContent 
+  // Overlay for mobile when open
+  const overlay = isOpen ? (
+    <div
+      className="position-fixed top-0 start-0 w-100 h-100"
+      style={{ backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 1090 }}
+      onClick={() => setIsOpen(false)}
+    />
+  ) : null
+
+  // Sidebar element (slides in on mobile)
+  const asideEl = (
+    <aside
+      className="bg-light border-end position-fixed h-100 overflow-y-auto"
+      style={{
+        width: '280px',
+        padding: '20px',
+        zIndex: 1100,
+        left: isOpen || !isMobile ? 0 : '-280px',
+        transition: 'left 0.25s ease',
+        top: 0
+      }}
+    >
+      {isMobile && (
+        <button
+          className="btn-close mb-3"
+          onClick={() => setIsOpen(false)}
+          aria-label="Close"
+        ></button>
+      )}
+      <SidebarContent
         month={month}
         setMonth={setMonth}
         days={days}
         currentTraining={currentTraining}
         trainingData={trainingData}
-        onSelectDate={onSelectDate}
+        onSelectDate={handleSelectDate}
       />
     </aside>
+  )
+
+  return (
+    <>
+      {toggleButton}
+      {overlay}
+      {asideEl}
+    </>
   )
 }
 
