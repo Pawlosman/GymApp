@@ -81,17 +81,19 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     return `workouts_${user?.id}_${selectedDate}`
   }
 
-  function saveToLocalStorage(data) {
+  function saveToLocalStorage(data, markPending = true) {
     try {
       localStorage.setItem(getLocalStorageKey(), JSON.stringify(data))
-      // Mark as pending sync
-      const pendingKey = `pending_sync_${user?.id}`
-      const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
-      if (!pending.includes(selectedDate)) {
-        pending.push(selectedDate)
-        localStorage.setItem(pendingKey, JSON.stringify(pending))
+      // Mark as pending sync only if requested
+      if (markPending) {
+        const pendingKey = `pending_sync_${user?.id}`
+        const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
+        if (!pending.includes(selectedDate)) {
+          pending.push(selectedDate)
+          localStorage.setItem(pendingKey, JSON.stringify(pending))
+        }
+        setPendingSync(true)
       }
-      setPendingSync(true)
     } catch (e) {
       console.error('Failed to save to localStorage:', e)
     }
@@ -165,8 +167,8 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
         if (error) console.error(error)
         else {
           setWorkouts(data || [])
-          // Save to localStorage for offline access
-          saveToLocalStorage(data || [])
+          // Save to localStorage for offline access (without marking as pending)
+          saveToLocalStorage(data || [], false)
         }
       } catch (e) {
         console.error('Failed to fetch from Supabase:', e)
@@ -266,7 +268,6 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           .eq('id', myRecord.id)
           .then(({ error }) => {
             if (error) console.error(error)
-            else fetchWorkouts()
           })
       }
     }
@@ -303,20 +304,18 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
         }]
 
     setWorkouts(updatedWorkouts)
-    saveToLocalStorage(updatedWorkouts)
+    saveToLocalStorage(updatedWorkouts, true) // Mark as pending
 
-    // If online, sync to Supabase
+    // If online, sync to Supabase in background (don't refetch)
     if (navigator.onLine) {
       try {
         if (myRecord && !String(myRecord.id).startsWith('temp_')) {
-          const { error } = await supabase
+          await supabase
             .from('workouts')
             .update({ set_records: setRecordsData })
             .eq('id', myRecord.id)
-          if (error) console.error(error)
-          else fetchWorkouts()
         } else {
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('workouts')
             .insert([{
               user_id: user.id,
@@ -327,8 +326,18 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
               reps: reps || 0,
               weight: weight || 0
             }])
-          if (error) console.error(error)
-          else fetchWorkouts()
+            .select()
+
+          // Update the temp ID with the real ID from database
+          if (!error && data && data[0]) {
+            const finalWorkouts = updatedWorkouts.map(w =>
+              String(w.id).startsWith('temp_') && w.exercise_name === exerciseName
+                ? { ...w, id: data[0].id }
+                : w
+            )
+            setWorkouts(finalWorkouts)
+            saveToLocalStorage(finalWorkouts, false)
+          }
         }
       } catch (e) {
         console.error('Failed to save online:', e)
