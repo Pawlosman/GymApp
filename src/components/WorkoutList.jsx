@@ -149,6 +149,11 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   async function fetchWorkouts() {
     if (!user) return
 
+    // Check if current date has pending sync
+    const pendingKey = `pending_sync_${user.id}`
+    const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
+    setPendingSync(pending.includes(selectedDate))
+
     // Try to load from localStorage first
     const localData = loadFromLocalStorage()
     if (localData) {
