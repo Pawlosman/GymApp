@@ -1,17 +1,40 @@
 {
-  "Tuesday": [
-    { "name": "Back Squat", "sets": 4, "reps": 6, "weight": 80 },
-    { "name": "Leg Press", "sets": 3, "reps": 10, "weight": 120 },
-    { "name": "Hamstring Curl", "sets": 3, "reps": 12, "weight": 40 }
-  ],
-  "Thursday": [
-    { "name": "Bench Press", "sets": 4, "reps": 6, "weight": 70 },
-    { "name": "Incline DB Press", "sets": 3, "reps": 8, "weight": 28 },
-    { "name": "Triceps Pushdown", "sets": 3, "reps": 12, "weight": 25 }
-  ],
-  "Saturday": [
-    { "name": "Deadlift", "sets": 4, "reps": 5, "weight": 120 },
-    { "name": "Barbell Row", "sets": 3, "reps": 8, "weight": 60 },
-    { "name": "Pull-ups", "sets": 3, "reps": 8, "weight": 0 }
-  ]
+  "trainings": {
+    "Training 1": {
+      "months": ["January", "February"],
+      "Tuesday": [
+        { "name": "Back Squat", "sets": 4, "reps": 6, "weight": 80 },
+        { "name": "Leg Press", "sets": 3, "reps": 10, "weight": 120 },
+        { "name": "Hamstring Curl", "sets": 3, "reps": 12, "weight": 40 }
+      ],
+      "Thursday": [
+        { "name": "Bench Press", "sets": 4, "reps": 6, "weight": 70 },
+        { "name": "Incline DB Press", "sets": 3, "reps": 8, "weight": 28 },
+        { "name": "Triceps Pushdown", "sets": 3, "reps": 12, "weight": 25 }
+      ],
+      "Saturday": [
+        { "name": "Deadlift", "sets": 4, "reps": 5, "weight": 120 },
+        { "name": "Barbell Row", "sets": 3, "reps": 8, "weight": 60 },
+        { "name": "Pull-ups", "sets": 3, "reps": 8, "weight": 0 }
+      ]
+    },
+    "Training 2": {
+      "months": ["March", "April"],
+      "Tuesday": [
+        { "name": "Front Squat", "sets": 4, "reps": 5, "weight": 70 },
+        { "name": "Bulgarian Split Squat", "sets": 3, "reps": 8, "weight": 30 },
+        { "name": "Leg Curl", "sets": 3, "reps": 12, "weight": 50 }
+      ],
+      "Thursday": [
+        { "name": "Dumbbell Bench Press", "sets": 4, "reps": 8, "weight": 32 },
+        { "name": "Cable Fly", "sets": 3, "reps": 10, "weight": 20 },
+        { "name": "Rope Triceps Extension", "sets": 3, "reps": 12, "weight": 30 }
+      ],
+      "Saturday": [
+        { "name": "Trap Bar Deadlift", "sets": 4, "reps": 6, "weight": 140 },
+        { "name": "Seal Row", "sets": 3, "reps": 10, "weight": 50 },
+        { "name": "Assisted Pull-ups", "sets": 3, "reps": 10, "weight": -20 }
+      ]
+    }
+  }
 }

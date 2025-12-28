@@ -18,24 +18,23 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1>GymApp</h1>
+      <Sidebar onSelectDate={(d) => setSelectedDate(d)} />
       {!session ? (
-        <Login />
+        <div className="container-fluid p-4">
+          <h1>GymApp</h1>
+          <Login />
+        </div>
       ) : (
-        <div style={{ display: 'flex', gap: 20 }}>
-          <Sidebar onSelectDate={(d) => setSelectedDate(d)} />
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut()
-                }}
-              >
-                Logout
-              </button>
-            </div>
-            <WorkoutList user={session.user} selectedDate={selectedDate} />
+        <div className="container-fluid p-4">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h1>GymApp</h1>
+            <button className="btn btn-danger" onClick={async () => {
+              await supabase.auth.signOut()
+            }}>
+              Logout
+            </button>
           </div>
+          <WorkoutList user={session.user} selectedDate={selectedDate} />
         </div>
       )}
     </div>
