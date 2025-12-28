@@ -163,7 +163,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                 type="number"
                                 className="form-control form-control-sm"
                                 placeholder="Reps"
-                                defaultValue={mySetRecords[setIndex]?.reps || ''}
+                                defaultValue={''}
                                 onBlur={(e) => saveSetRecord(exercise.name, setIndex, Number(e.target.value), mySetRecords[setIndex]?.weight)}
                               />
                             </td>
@@ -172,7 +172,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                 type="number"
                                 className="form-control form-control-sm"
                                 placeholder="Weight"
-                                defaultValue={mySetRecords[setIndex]?.weight || ''}
+                                defaultValue={''}
                                 onBlur={(e) => saveSetRecord(exercise.name, setIndex, mySetRecords[setIndex]?.reps, Number(e.target.value))}
                               />
                             </td>
