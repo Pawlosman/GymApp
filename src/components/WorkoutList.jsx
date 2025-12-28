@@ -310,10 +310,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
           user_id: user.id,
           date: selectedDate,
           exercise_name: exerciseName,
-          set_records: setRecordsData,
-          sets: exerciseTemplate.find(e => e.name === exerciseName)?.sets || 1,
-          reps: reps || 0,
-          weight: weight || 0
+          set_records: setRecordsData
         }]
 
     setWorkouts(updatedWorkouts)
@@ -337,10 +334,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
               user_id: user.id,
               date: selectedDate,
               exercise_name: exerciseName,
-              set_records: setRecordsData,
-              sets: exerciseTemplate.find(e => e.name === exerciseName)?.sets || 1,
-              reps: reps || 0,
-              weight: weight || 0
+              set_records: setRecordsData
             }])
             .select()
 
@@ -354,6 +348,8 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
             setWorkouts(finalWorkouts)
             saveToLocalStorage(finalWorkouts, false)
             clearPendingSync()
+          } else if (error) {
+            console.error('Insert error:', error)
           }
         }
       } catch (e) {
