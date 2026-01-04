@@ -184,8 +184,10 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
                 }}
                 style={{ fontSize: '1rem', padding: '0.5rem 0.75rem' }}
               >
-                <div style={{ fontSize: '1.1rem', fontWeight: '500' }}>{d.iso}</div>
-                <div className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.9rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>{d.iso}</span>
+                  <span className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.9rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</span>
+                </div>
               </button>
             )
           })}
