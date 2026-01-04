@@ -177,14 +177,15 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
             return (
               <button
                 key={d.iso}
-                className={`btn btn-sm text-start ${btnClass}`}
+                className={`btn text-start ${btnClass}`}
                 onClick={() => {
                   console.log('Date clicked:', d.iso, 'Current selected:', selectedDate)
                   onSelectDate(d.iso)
                 }}
+                style={{ fontSize: '1rem', padding: '0.75rem 1rem' }}
               >
-                <div className="small">{d.iso}</div>
-                <div className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.75rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '500' }}>{d.iso}</div>
+                <div className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.9rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
               </button>
             )
           })}
