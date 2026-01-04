@@ -46,7 +46,7 @@
         { "name": "B3 Goblet Squat", "category": "STRONG", "sets": 3, "reps": 8, "rest": "60s", "image": "T2B3TUESDAY.jpg" },
         { "name": "C1 Face Pull", "category": "UPPER", "sets": 3, "reps": 8, "tempo": "AMRAP", "image": "T2C1TUESDAY.jpg" },
         { "name": "C2 Standing Dumbbell Bicep Curl - Pronated Grip", "category": "UPPER", "sets": 3, "reps": 8, "time": "12 mins", "tempo": "AMRAP", "image": "T2C2TUESDAY.jpg" },
-        { "name": "D2 Abductor Adductor Machine", "category": "LOWER", "sets": 3, "reps": 10, "tempo": "AMRAP", "image": "T2D1TUESDAY.jpg" },
+        { "name": "D1 Abductor Adductor Machine", "category": "LOWER", "sets": 3, "reps": 10, "tempo": "AMRAP", "image": "T2D1TUESDAY.jpg" },
         { "name": "D2 Hip Thrust Hold", "category": "LOWER", "sets": 3, "reps": 8,"tempo": "AMRAP", "image": "T2D2TUESDAY.jpg" }
       ],
       "Thursday": [
