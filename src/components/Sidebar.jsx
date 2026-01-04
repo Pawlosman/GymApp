@@ -182,7 +182,7 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
                   console.log('Date clicked:', d.iso, 'Current selected:', selectedDate)
                   onSelectDate(d.iso)
                 }}
-                style={{ fontSize: '1rem', padding: '0.75rem 1rem' }}
+                style={{ fontSize: '1rem', padding: '0.5rem 0.75rem' }}
               >
                 <div style={{ fontSize: '1.1rem', fontWeight: '500' }}>{d.iso}</div>
                 <div className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.9rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</div>
