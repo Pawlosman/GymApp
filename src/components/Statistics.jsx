@@ -30,8 +30,14 @@ export default function Statistics({ user }) {
       if (selectedMonth !== 'all') {
         const monthNum = String(parseInt(selectedMonth) + 1).padStart(2, '0')
         const yearMonth = `${selectedYear}-${monthNum}`
+
+        // Calculate the last day of the month
+        const nextMonth = parseInt(selectedMonth) + 2 // Next month (1-indexed)
+        const nextYear = nextMonth > 12 ? selectedYear + 1 : selectedYear
+        const nextMonthNum = nextMonth > 12 ? '01' : String(nextMonth).padStart(2, '0')
+
         query = query.gte('date', `${yearMonth}-01`)
-        query = query.lt('date', `${yearMonth}-32`)
+        query = query.lt('date', `${nextYear}-${nextMonthNum}-01`)
       } else {
         // Just filter by year
         query = query.gte('date', `${selectedYear}-01-01`)
@@ -68,12 +74,13 @@ export default function Statistics({ user }) {
         }
       }
 
+      // Calculate for each set: reps × weight, then sum all sets
       Object.values(setRecords).forEach(set => {
         const reps = parseInt(set.reps) || 0
         const weight = parseFloat(set.weight) || 0
-        const setWeight = reps * weight
+        const setWeight = reps * weight  // This calculates weight for ONE set
 
-        exerciseStats[exerciseName].totalWeight += setWeight
+        exerciseStats[exerciseName].totalWeight += setWeight  // Sum across all sets
         exerciseStats[exerciseName].totalReps += reps
         exerciseStats[exerciseName].totalSets += 1
         totalWeight += setWeight
