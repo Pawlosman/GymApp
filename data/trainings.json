@@ -9,9 +9,9 @@
         { "name": "B2 Barbell Standing Good Morning", "category": "STRONG", "sets": 3, "reps": 10, "image": "T1B2TUESDAY.jpg" },
         { "name": "B3 Banded wood chop", "category": "STRONG", "sets": 3, "reps": "10 E/S", "image": "T1B3TUESDAY.jpg" },
         { "name": "C1 Standing Barbell Bicep Curl - Medium Grip", "category": "UPPER", "sets": 3, "reps": 10, "rest": "60s", "image": "T1C1TUESDAY.jpg" },
-        { "name": "C2 Lat Pulldown", "category": "UPPER", "sets": "3", "reps": 10, "image": "T1C2TUESDAY.jpg" },
-        { "name": "D1 Weighted Hip Thrust", "category": "LOWER", "sets": "3", "reps": 10, "rest": "60s", "image": "T1D1TUESDAY.jpg" },
-        { "name": "D2 Abductor Adductor Machine", "category": "LOWER", "sets": "3", "reps": 10, "image": "T1D2TUESDAY.jpg" }
+        { "name": "C2 Lat Pulldown", "category": "UPPER", "sets": 3, "reps": 10, "image": "T1C2TUESDAY.jpg" },
+        { "name": "D1 Weighted Hip Thrust", "category": "LOWER", "sets": 3, "reps": 10, "rest": "60s", "image": "T1D1TUESDAY.jpg" },
+        { "name": "D2 Abductor Adductor Machine", "category": "LOWER", "sets": 3, "reps": 10, "image": "T1D2TUESDAY.jpg" }
       ],
       "Thursday": [
         { "name": "A1 Barbell Split Squat", "category": "LIFT", "sets": 3, "reps": "6 E/S", "rest": "90s", "image": "T1A1THURSDAY.webp" },
@@ -64,9 +64,9 @@
         { "name": "A2 Seated Dumbbell Shoulder Press - Pronated Grip", "category": "LIFT", "sets": 3, "reps": 6, "rest": "90s", "image": "T2A2SATURDAY.jpg" },
         { "name": "B1 Barbell Lunge", "category": "STRONG", "sets": 3, "reps": "8 E/S", "image": "T2B1SATURDAY.jpg" },
         { "name": "B2 Supinated DB bent over row", "category": "STRONG", "sets": 3, "reps": 8, "rest": "60s", "image": "T2B2SATURDAY.jpg" },
-        { "name": "C1 DB Cuban press", "category": "UPPER", "sets": 3, "reps": "40s", "image": "T2C1SATURDAY.jpg" },
-        { "name": "C2 Cable Woodchoppers", "category": "UPPER", "sets": 3, "reps": "8", "image": "T2C2SATURDAY.jpg" },
-        { "name": "D1 Prowler Push", "category": "LOWER", "sets": 3, "reps": "1-2L", "image": "T2D1SATURDAY.jpg" },
+        { "name": "C1 DB Cuban press", "category": "UPPER", "sets": 3, "reps": 8, "image": "T2C1SATURDAY.jpg" },
+        { "name": "C2 Cable Woodchoppers", "category": "UPPER", "sets": 3, "reps": 8, "image": "T2C2SATURDAY.jpg" },
+        { "name": "D1 Leg Press Machine", "category": "LOWER", "sets": 3, "reps": 10, "image": "T2D1SATURDAY.webp" },
         { "name": "D2 Sprinter Bridge", "category": "LOWER", "sets": 3, "reps": "30-40s", "image": "T2D2SATURDAY.jpg" }
       ]
     }
