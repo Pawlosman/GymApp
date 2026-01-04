@@ -28,7 +28,7 @@ export default function App() {
           <div style={{ flex: 1 }}>
             <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 sticky-top shadow-sm">
               <div className="container-fluid">
-                <div className="d-flex gap-2">
+                <div className="d-flex gap-2 align-items-center" style={{ marginLeft: '50px' }}>
                   <button
                     className={`btn btn-sm ${currentPage === 'workouts' ? 'btn-primary' : 'btn-outline-primary'}`}
                     onClick={() => setCurrentPage('workouts')}

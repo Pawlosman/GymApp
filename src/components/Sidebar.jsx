@@ -73,8 +73,8 @@ export default function Sidebar({ onSelectDate, selectedDate }) {
   // Always render a visible toggle so user can open sidebar on smaller screens
   const toggleButton = (
     <button
-      className="btn btn-outline-primary btn-sm position-fixed"
-      style={{ top: '12px', left: '10px', zIndex: 1100, fontSize: '14px', padding: '4px 8px' }}
+      className="btn btn-outline-primary btn-sm position-fixed d-flex align-items-center justify-content-center"
+      style={{ top: '8px', left: '10px', zIndex: 1100, fontSize: '18px', padding: '8px 12px', lineHeight: '1' }}
       onClick={() => setIsOpen(!isOpen)}
       aria-label="Toggle sidebar"
     >
