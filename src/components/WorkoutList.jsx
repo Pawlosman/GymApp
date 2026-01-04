@@ -438,7 +438,8 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                       className="card-img-top"
                       style={{
                         height: '200px',
-                        objectFit: 'cover',
+                        width: '100%',
+                        objectFit: 'contain',
                         backgroundColor: '#f8f9fa'
                       }}
                       onError={(e) => {
