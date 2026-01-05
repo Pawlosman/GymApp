@@ -410,7 +410,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
         </div>
       </div>
 
-      {exerciseTemplate.length === 0 ? (
+      {!training || exerciseTemplate.length === 0 ? (
         <div className="alert alert-info">No training scheduled for {weekday}</div>
       ) : (
         <div className="row g-4">
