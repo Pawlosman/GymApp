@@ -246,6 +246,8 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     }
   }
 
+  console.log('Debug:', { weekday, training: training ? Object.keys(training) : null, exerciseTemplate })
+
   // Initialize set counts from template
   useEffect(() => {
     const initialCounts = {}
