@@ -241,12 +241,10 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     if (training[weekday]) exerciseTemplate = training[weekday]
     else {
       const lower = weekday.toLowerCase()
-      const foundKey = Object.keys(training).find(k => k.toLowerCase() === lower || k.toLowerCase().startsWith(lower.slice(0,3)))
+      const foundKey = Object.keys(training).find(k => k !== 'months' && (k.toLowerCase() === lower || k.toLowerCase().startsWith(lower.slice(0,3))))
       if (foundKey) exerciseTemplate = training[foundKey]
     }
   }
-
-  console.log('Debug:', { weekday, training: training ? Object.keys(training) : null, exerciseTemplate })
 
   // Initialize set counts from template
   useEffect(() => {
