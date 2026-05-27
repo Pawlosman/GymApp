@@ -5,7 +5,6 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 const WEEKDAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function isoDate(date) {
-  // Use local date, not UTC
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -35,7 +34,20 @@ function daysForMonth(yearMonth) {
   return days
 }
 
-export default function Sidebar({ onSelectDate, selectedDate }) {
+function allDaysForMonth(yearMonth) {
+  const [y, m] = yearMonth.split('-').map(Number)
+  const days = []
+  const date = new Date(y, m - 1, 1)
+  while (date.getMonth() === m - 1) {
+    const iso = isoDate(new Date(date))
+    const isoWeekday = date.getDay() === 0 ? 7 : date.getDay()
+    days.push({ iso, weekday: isoWeekday })
+    date.setDate(date.getDate() + 1)
+  }
+  return days
+}
+
+export default function Sidebar({ onSelectDate, selectedDate, profile, selectedTraining }) {
   const now = new Date()
   const defaultMonth = now.toISOString().slice(0, 7)
   const todayIso = isoDate(now)
@@ -50,7 +62,6 @@ export default function Sidebar({ onSelectDate, selectedDate }) {
       if (!mobile) setIsOpen(false)
     }
     window.addEventListener('resize', handleResize)
-    // listen for global toggle event (from navbar)
     const toggleHandler = () => setIsOpen((v) => !v)
     window.addEventListener('toggleSidebar', toggleHandler)
     return () => {
@@ -59,18 +70,19 @@ export default function Sidebar({ onSelectDate, selectedDate }) {
     }
   }, [])
 
-  const days = daysForMonth(month)
   const [y, m] = month.split('-').map(Number)
+  const isTomek = profile === 'tomek'
+
+  const days = isTomek ? allDaysForMonth(month) : daysForMonth(month)
   const trainingInfo = getTrainingForMonth(m - 1)
   const currentTraining = trainingInfo?.trainingName || 'Training 1'
   const trainingData = trainingInfo?.training
 
-  const handleSelectDate = (date) => {
-    onSelectDate(date)
+  const handleSelectDate = (date, training = null) => {
+    onSelectDate(date, training)
     if (isMobile) setIsOpen(false)
   }
 
-  // Always render a visible toggle so user can open sidebar on smaller screens
   const toggleButton = (
     <button
       className="btn btn-outline-primary btn-sm position-fixed d-flex align-items-center justify-content-center"
@@ -82,7 +94,6 @@ export default function Sidebar({ onSelectDate, selectedDate }) {
     </button>
   )
 
-  // Overlay for mobile when open
   const overlay = isOpen ? (
     <div
       className="position-fixed top-0 start-0 w-100 h-100"
@@ -91,65 +102,41 @@ export default function Sidebar({ onSelectDate, selectedDate }) {
     />
   ) : null
 
-  // Sidebar element: fixed sliding on mobile, static on wide screens
+  const contentProps = {
+    month, setMonth, days, currentTraining, trainingData,
+    onSelectDate: handleSelectDate, todayIso, selectedDate,
+    profile, selectedTraining, isTomek
+  }
+
   if (!isMobile) {
     return (
       <aside className="bg-light border-end" style={{ width: '280px', minHeight: '100vh', padding: '20px' }}>
-        <SidebarContent
-          month={month}
-          setMonth={setMonth}
-          days={days}
-          currentTraining={currentTraining}
-          trainingData={trainingData}
-          onSelectDate={onSelectDate}
-          todayIso={todayIso}
-          selectedDate={selectedDate}
-        />
+        <SidebarContent {...contentProps} onSelectDate={onSelectDate} />
       </aside>
     )
   }
-
-  // mobile: overlay + slide-in aside
-  const asideEl = (
-    <aside
-      className="bg-light border-end position-fixed h-100 overflow-y-auto"
-      style={{
-        width: '280px',
-        padding: '20px',
-        zIndex: 1100,
-        left: isOpen ? 0 : '-280px',
-        transition: 'left 0.25s ease',
-        top: 0
-      }}
-    >
-      <button
-        className="btn-close mb-3"
-        onClick={() => setIsOpen(false)}
-        aria-label="Close"
-      ></button>
-      <SidebarContent
-        month={month}
-        setMonth={setMonth}
-        days={days}
-        currentTraining={currentTraining}
-        trainingData={trainingData}
-        onSelectDate={handleSelectDate}
-        todayIso={todayIso}
-        selectedDate={selectedDate}
-      />
-    </aside>
-  )
 
   return (
     <>
       {toggleButton}
       {overlay}
-      {asideEl}
+      <aside
+        className="bg-light border-end position-fixed h-100 overflow-y-auto"
+        style={{
+          width: '280px', padding: '20px', zIndex: 1100,
+          left: isOpen ? 0 : '-280px', transition: 'left 0.25s ease', top: 0
+        }}
+      >
+        <button className="btn-close mb-3" onClick={() => setIsOpen(false)} aria-label="Close" />
+        <SidebarContent {...contentProps} />
+      </aside>
     </>
   )
 }
 
-function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek }) {
+  const tomekTrainings = trainingsData.tomekTrainings
+
   return (
     <>
       <h4 className="mb-4">
@@ -161,6 +148,32 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
         <input type="month" className="form-control form-control-sm" value={month} onChange={(e) => setMonth(e.target.value)} />
       </div>
 
+      {isTomek ? (
+        <TomekSidebarContent
+          days={days}
+          tomekTrainings={tomekTrainings}
+          onSelectDate={onSelectDate}
+          todayIso={todayIso}
+          selectedDate={selectedDate}
+          selectedTraining={selectedTraining}
+        />
+      ) : (
+        <TataSidebarContent
+          days={days}
+          currentTraining={currentTraining}
+          trainingData={trainingData}
+          onSelectDate={onSelectDate}
+          todayIso={todayIso}
+          selectedDate={selectedDate}
+        />
+      )}
+    </>
+  )
+}
+
+function TataSidebarContent({ days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate }) {
+  return (
+    <>
       <div className="mb-4">
         <label className="form-label fw-bold text-primary">{currentTraining}</label>
         <strong className="d-block mb-2">Training Days</strong>
@@ -169,19 +182,12 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
             const isToday = d.iso === todayIso
             const isSelected = selectedDate && d.iso === selectedDate
             let btnClass = 'btn-outline-secondary'
-            if (isSelected) {
-              btnClass = 'btn-primary'
-            } else if (isToday) {
-              btnClass = 'btn-outline-primary'
-            }
+            if (isToday || isSelected) btnClass = 'btn-primary'
             return (
               <button
                 key={d.iso}
                 className={`btn text-start ${btnClass}`}
-                onClick={() => {
-                  console.log('Date clicked:', d.iso, 'Current selected:', selectedDate)
-                  onSelectDate(d.iso)
-                }}
+                onClick={() => onSelectDate(d.iso)}
                 style={{ fontSize: '1rem', padding: '0.5rem 0.75rem' }}
               >
                 <div className="d-flex justify-content-between align-items-center">
@@ -203,6 +209,81 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
             <em className="d-block text-secondary fw-bold">{day}</em>
             <ul className="small ps-3 mb-2">
               {trainingData[day].map((t, i) => (
+                <li key={i} className="text-muted">{t.name} — {t.sets}×{t.reps}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function TomekSidebarContent({ days, tomekTrainings, onSelectDate, todayIso, selectedDate, selectedTraining }) {
+  const [expandedDate, setExpandedDate] = useState(null)
+
+  function toggleDate(iso) {
+    setExpandedDate(prev => prev === iso ? null : iso)
+  }
+
+  return (
+    <>
+      <div className="mb-4">
+        <label className="form-label fw-bold text-success">Tomek's Training</label>
+        <small className="d-block text-muted mb-2">Pick a day, then choose Training A or B</small>
+        <div className="d-flex flex-column gap-1">
+          {days.map((d) => {
+            const isToday = d.iso === todayIso
+            const isSelected = selectedDate && d.iso === selectedDate
+            const isExpanded = expandedDate === d.iso
+            let btnClass = 'btn-outline-secondary'
+            if (isToday) btnClass = 'btn-secondary'
+            else if (isSelected) btnClass = 'btn-success'
+
+            return (
+              <div key={d.iso}>
+                <button
+                  className={`btn text-start w-100 ${btnClass}`}
+                  onClick={() => toggleDate(d.iso)}
+                  style={{ fontSize: '0.95rem', padding: '0.4rem 0.75rem' }}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span style={{ fontWeight: '500' }}>{d.iso}</span>
+                    <span className={isSelected ? 'text-white-50' : 'text-muted'} style={{ fontSize: '0.85rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</span>
+                  </div>
+                </button>
+                {isExpanded && (
+                  <div className="d-flex gap-1 mt-1 mb-1 ps-1">
+                    {Object.keys(tomekTrainings).map((tName) => {
+                      const label = tName.replace(/^Tomek\s*/i, '')
+                      const isThisSelected = isSelected && selectedTraining === tName
+                      return (
+                        <button
+                          key={tName}
+                          className={`btn btn-sm flex-fill ${isThisSelected ? 'btn-success' : 'btn-outline-success'}`}
+                          onClick={() => { onSelectDate(d.iso, tName); setExpandedDate(null) }}
+                        >
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <hr />
+
+      <div>
+        <strong className="d-block mb-3">Templates</strong>
+        {Object.entries(tomekTrainings).map(([tName, tData]) => (
+          <div key={tName} className="mb-3">
+            <em className="d-block text-secondary fw-bold">{tName.replace('Tomek ', '')}</em>
+            <ul className="small ps-3 mb-2">
+              {tData.exercises.map((t, i) => (
                 <li key={i} className="text-muted">{t.name} — {t.sets}×{t.reps}</li>
               ))}
             </ul>

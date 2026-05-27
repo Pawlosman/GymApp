@@ -7,7 +7,6 @@ const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', '
 const DAY_NUMBERS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 function isoDate(date) {
-  // Use local date, not UTC
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -38,8 +37,7 @@ function getTrainingForMonth(monthIndex) {
   return null
 }
 
-export default function WorkoutList({ user, selectedDate: externalSelectedDate }) {
-  // Auto-detect today's date
+export default function WorkoutList({ user, profile, selectedDate: externalSelectedDate, selectedTraining }) {
   const todayDate = isoDate(new Date())
   const [selectedDate, setSelectedDate] = useState(todayDate)
   const [workouts, setWorkouts] = useState([])
@@ -48,23 +46,19 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingSync, setPendingSync] = useState(false)
 
-  // Monitor online/offline status
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true)
-      syncOfflineData()
-    }
-    const handleOffline = () => setIsOnline(false)
+  const isTomek = profile === 'tomek'
 
+  useEffect(() => {
+    const handleOnline = () => { setIsOnline(true); syncOfflineData() }
+    const handleOffline = () => setIsOnline(false)
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, profile])
 
   useEffect(() => {
     if (externalSelectedDate) setSelectedDate(externalSelectedDate)
@@ -74,22 +68,22 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     if (!user) return
     fetchWorkouts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, selectedDate])
+  }, [user, selectedDate, profile, selectedTraining])
 
-  // Load from localStorage
   function getLocalStorageKey() {
-    return `workouts_${user?.id}_${selectedDate}`
+    const trainingTag = isTomek && selectedTraining ? `_${selectedTraining.replace(/\s+/g, '_')}` : ''
+    return `workouts_${profile}_${user?.id}_${selectedDate}${trainingTag}`
   }
 
   function saveToLocalStorage(data, markPending = true) {
     try {
       localStorage.setItem(getLocalStorageKey(), JSON.stringify(data))
-      // Mark as pending sync only if requested
       if (markPending) {
-        const pendingKey = `pending_sync_${user?.id}`
+        const pendingKey = `pending_sync_${profile}_${user?.id}`
         const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
-        if (!pending.includes(selectedDate)) {
-          pending.push(selectedDate)
+        const key = isTomek && selectedTraining ? `${selectedDate}::${selectedTraining}` : selectedDate
+        if (!pending.includes(key)) {
+          pending.push(key)
           localStorage.setItem(pendingKey, JSON.stringify(pending))
         }
         setPendingSync(true)
@@ -104,34 +98,28 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
       const data = localStorage.getItem(getLocalStorageKey())
       return data ? JSON.parse(data) : null
     } catch (e) {
-      console.error('Failed to load from localStorage:', e)
       return null
     }
   }
 
   async function syncOfflineData() {
     if (!user || !navigator.onLine) return
-
-    const pendingKey = `pending_sync_${user.id}`
+    const pendingKey = `pending_sync_${profile}_${user.id}`
     const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
 
-    for (const date of pending) {
-      const localKey = `workouts_${user.id}_${date}`
+    for (const key of pending) {
+      const [date, training] = key.split('::')
+      const trainingTag = training ? `_${training.replace(/\s+/g, '_')}` : ''
+      const localKey = `workouts_${profile}_${user.id}_${date}${trainingTag}`
       const localData = localStorage.getItem(localKey)
       if (localData) {
         const workoutsToSync = JSON.parse(localData)
         for (const workout of workoutsToSync) {
           try {
-            // Try to update if exists, otherwise insert
-            const { error } = await supabase
-              .from('workouts')
-              .upsert({
-                ...workout,
-                user_id: user.id,
-                date: date
-              }, {
-                onConflict: 'id'
-              })
+            const { error } = await supabase.from('workouts').upsert(
+              { ...workout, user_id: user.id, date },
+              { onConflict: 'id' }
+            )
             if (error) console.error('Sync error:', error)
           } catch (e) {
             console.error('Failed to sync:', e)
@@ -140,7 +128,6 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
       }
     }
 
-    // Clear pending sync list
     localStorage.removeItem(pendingKey)
     setPendingSync(false)
     fetchWorkouts()
@@ -149,66 +136,65 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   async function fetchWorkouts() {
     if (!user) return
 
-    // Check if current date has pending sync
-    const pendingKey = `pending_sync_${user.id}`
+    const pendingKey = `pending_sync_${profile}_${user.id}`
     const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
-    setPendingSync(pending.includes(selectedDate))
+    const key = isTomek && selectedTraining ? `${selectedDate}::${selectedTraining}` : selectedDate
+    setPendingSync(pending.includes(key))
 
-    // Try to load from localStorage first
     const localData = loadFromLocalStorage()
-    if (localData) {
-      setWorkouts(localData)
-    }
+    if (localData) setWorkouts(localData)
 
-    // If online, fetch from Supabase
     if (navigator.onLine) {
       try {
-        const { data, error } = await supabase
-          .from('workouts')
-          .select('*')
+        let query = supabase.from('workouts').select('*')
           .eq('user_id', user.id)
           .eq('date', selectedDate)
           .order('id', { ascending: true })
+
+        if (isTomek) {
+          query = query.eq('profile', 'tomek')
+          if (selectedTraining) query = query.eq('training_name', selectedTraining)
+        } else {
+          query = query.eq('profile', 'tata')
+        }
+
+        const { data, error } = await query
         if (error) console.error(error)
         else {
           setWorkouts(data || [])
-          // Save to localStorage for offline access (without marking as pending)
           saveToLocalStorage(data || [], false)
         }
       } catch (e) {
-        console.error('Failed to fetch from Supabase:', e)
-        // Use local data if available
-        if (localData) {
-          setWorkouts(localData)
-        }
+        if (localData) setWorkouts(localData)
       }
     }
 
-    // Fetch last workout data for placeholders
     fetchLastWorkouts()
   }
 
   async function fetchLastWorkouts() {
     if (!user || !navigator.onLine) return
-
     try {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select('*')
+      let query = supabase.from('workouts').select('*')
         .eq('user_id', user.id)
         .lt('date', selectedDate)
         .order('date', { ascending: false })
         .limit(50)
 
-      if (!error && data) {
-        setLastWorkouts(data)
+      if (isTomek) {
+        query = query.eq('profile', 'tomek')
+        if (selectedTraining) query = query.eq('training_name', selectedTraining)
+      } else {
+        query = query.eq('profile', 'tata')
       }
+
+      const { data, error } = await query
+      if (!error && data) setLastWorkouts(data)
     } catch (e) {
       console.error('Failed to fetch last workouts:', e)
     }
   }
 
-  // support several input formats for selectedDate (ISO or dd/mm/yyyy or mm/dd/yyyy)
   function parseSelectedDate(str) {
     if (!str) return new Date()
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
@@ -217,13 +203,8 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     }
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
       const [a, b, c] = str.split('/').map(Number)
-      // prefer day/month/year (European) if ambiguous
-      const day = a
-      const month = b
-      const year = c
-      return new Date(year, month - 1, day)
+      return new Date(c, b - 1, a)
     }
-    // fallback to Date constructor
     const d = new Date(str)
     if (!isNaN(d)) return d
     return new Date()
@@ -233,146 +214,110 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
   const monthIndex = localDateObj.getMonth()
   const weekday = WEEKDAY_NAMES[localDateObj.getDay()]
   const dateDisplay = formatDateDisplay(selectedDate)
-  const trainingInfo = getTrainingForMonth(monthIndex)
-  const training = trainingInfo?.training
+
   let exerciseTemplate = []
-  if (training) {
-    // try exact match, then try short-name match (Tue -> Tuesday or vice-versa)
-    if (training[weekday]) exerciseTemplate = training[weekday]
-    else {
-      const lower = weekday.toLowerCase()
-      const foundKey = Object.keys(training).find(k => k !== 'months' && (k.toLowerCase() === lower || k.toLowerCase().startsWith(lower.slice(0,3))))
-      if (foundKey) exerciseTemplate = training[foundKey]
+  if (isTomek) {
+    if (selectedTraining && trainingsData.tomekTrainings[selectedTraining]) {
+      exerciseTemplate = trainingsData.tomekTrainings[selectedTraining].exercises
+    }
+  } else {
+    const trainingInfo = getTrainingForMonth(monthIndex)
+    const training = trainingInfo?.training
+    if (training) {
+      if (training[weekday]) exerciseTemplate = training[weekday]
+      else {
+        const lower = weekday.toLowerCase()
+        const foundKey = Object.keys(training).find(k => k !== 'months' && (k.toLowerCase() === lower || k.toLowerCase().startsWith(lower.slice(0, 3))))
+        if (foundKey) exerciseTemplate = training[foundKey]
+      }
     }
   }
 
-  // Initialize set counts from template
   useEffect(() => {
     const initialCounts = {}
-    exerciseTemplate.forEach(ex => {
-      initialCounts[ex.name] = ex.sets
-    })
+    exerciseTemplate.forEach(ex => { initialCounts[ex.name] = ex.sets })
     setSetsCounts(initialCounts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, weekday])
+  }, [selectedDate, weekday, selectedTraining])
 
   function addSet(exerciseName) {
-    setSetsCounts(prev => ({
-      ...prev,
-      [exerciseName]: (prev[exerciseName] || 0) + 1
-    }))
+    setSetsCounts(prev => ({ ...prev, [exerciseName]: (prev[exerciseName] || 0) + 1 }))
   }
 
   function removeSet(exerciseName, setIndex) {
-    // Remove the specific set from the database
     const myRecord = workouts.find(w => w.exercise_name === exerciseName)
     if (myRecord?.set_records) {
       const updatedSetRecords = { ...myRecord.set_records }
       delete updatedSetRecords[setIndex]
-
-      // Reindex remaining sets
       const reindexed = {}
-      Object.keys(updatedSetRecords)
-        .map(Number)
-        .sort((a, b) => a - b)
-        .forEach((oldIndex, newIndex) => {
-          reindexed[newIndex] = updatedSetRecords[oldIndex]
-        })
-
-      // Update local state immediately
+      Object.keys(updatedSetRecords).map(Number).sort((a, b) => a - b).forEach((oldIndex, newIndex) => {
+        reindexed[newIndex] = updatedSetRecords[oldIndex]
+      })
       const updatedWorkouts = workouts.map(w =>
-        w.exercise_name === exerciseName
-          ? { ...w, set_records: reindexed }
-          : w
+        w.exercise_name === exerciseName ? { ...w, set_records: reindexed } : w
       )
       setWorkouts(updatedWorkouts)
       saveToLocalStorage(updatedWorkouts)
-
-      // Update database if online
       if (navigator.onLine && !String(myRecord.id).startsWith('temp_')) {
-        supabase
-          .from('workouts')
-          .update({ set_records: reindexed })
-          .eq('id', myRecord.id)
-          .then(({ error }) => {
-            if (error) console.error(error)
-            else clearPendingSync()
-          })
+        supabase.from('workouts').update({ set_records: reindexed }).eq('id', myRecord.id)
+          .then(({ error }) => { if (!error) clearPendingSync() })
       }
     }
-
-    // Decrease the count
-    setSetsCounts(prev => ({
-      ...prev,
-      [exerciseName]: Math.max(1, (prev[exerciseName] || 1) - 1)
-    }))
+    setSetsCounts(prev => ({ ...prev, [exerciseName]: Math.max(1, (prev[exerciseName] || 1) - 1) }))
   }
 
   function clearPendingSync() {
-    const pendingKey = `pending_sync_${user?.id}`
+    const pendingKey = `pending_sync_${profile}_${user?.id}`
     const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
-    const updated = pending.filter(d => d !== selectedDate)
-    if (updated.length > 0) {
-      localStorage.setItem(pendingKey, JSON.stringify(updated))
-    } else {
-      localStorage.removeItem(pendingKey)
-    }
-    // Always update state to trigger re-render
+    const key = isTomek && selectedTraining ? `${selectedDate}::${selectedTraining}` : selectedDate
+    const updated = pending.filter(d => d !== key)
+    if (updated.length > 0) localStorage.setItem(pendingKey, JSON.stringify(updated))
+    else localStorage.removeItem(pendingKey)
     setPendingSync(false)
   }
 
   async function saveSetRecord(exerciseName, setIndex, reps, weight) {
     if (!user) return alert('Sign in first')
 
-    // Find existing workout record
     let myRecord = workouts.find(w => w.exercise_name === exerciseName)
     const setRecordsData = myRecord?.set_records || {}
     setRecordsData[setIndex] = { reps, weight }
 
-    // Update local state immediately
+    const newWorkoutBase = {
+      id: `temp_${Date.now()}`,
+      user_id: user.id,
+      date: selectedDate,
+      exercise_name: exerciseName,
+      set_records: setRecordsData,
+      profile: profile,
+      ...(isTomek && selectedTraining ? { training_name: selectedTraining } : {})
+    }
+
     const updatedWorkouts = myRecord
-      ? workouts.map(w => w.exercise_name === exerciseName
-          ? { ...w, set_records: setRecordsData }
-          : w)
-      : [...workouts, {
-          id: `temp_${Date.now()}`,
-          user_id: user.id,
-          date: selectedDate,
-          exercise_name: exerciseName,
-          set_records: setRecordsData
-        }]
+      ? workouts.map(w => w.exercise_name === exerciseName ? { ...w, set_records: setRecordsData } : w)
+      : [...workouts, newWorkoutBase]
 
     setWorkouts(updatedWorkouts)
-    saveToLocalStorage(updatedWorkouts, true) // Mark as pending
+    saveToLocalStorage(updatedWorkouts, true)
 
-    // If online, sync to Supabase in background (don't refetch)
     if (navigator.onLine) {
       try {
         if (myRecord && !String(myRecord.id).startsWith('temp_')) {
-          const { error } = await supabase
-            .from('workouts')
-            .update({ set_records: setRecordsData })
-            .eq('id', myRecord.id)
-          if (!error) {
-            clearPendingSync()
-          }
+          const { error } = await supabase.from('workouts').update({ set_records: setRecordsData }).eq('id', myRecord.id)
+          if (!error) clearPendingSync()
         } else {
-          const { data, error } = await supabase
-            .from('workouts')
-            .insert([{
-              user_id: user.id,
-              date: selectedDate,
-              exercise_name: exerciseName,
-              set_records: setRecordsData
-            }])
-            .select()
-
-          // Update the temp ID with the real ID from database
+          const insertData = {
+            user_id: user.id,
+            date: selectedDate,
+            exercise_name: exerciseName,
+            set_records: setRecordsData,
+            profile: profile,
+            ...(isTomek && selectedTraining ? { training_name: selectedTraining } : {})
+          }
+          const { data, error } = await supabase.from('workouts').insert([insertData]).select()
           if (!error && data && data[0]) {
             const finalWorkouts = updatedWorkouts.map(w =>
-              String(w.id).startsWith('temp_') && w.exercise_name === exerciseName
-                ? { ...w, id: data[0].id }
-                : w
+              String(w.id).startsWith('temp_') && w.exercise_name === exerciseName ? { ...w, id: data[0].id } : w
             )
             setWorkouts(finalWorkouts)
             saveToLocalStorage(finalWorkouts, false)
@@ -387,31 +332,32 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
     }
   }
 
+  const noTrainingMessage = isTomek
+    ? 'Select a day and choose Training A or B from the sidebar'
+    : `No training scheduled for ${weekday}`
+
+  const trainingLabel = isTomek && selectedTraining
+    ? selectedTraining.replace('Tomek ', '')
+    : null
+
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">{dateDisplay}</h2>
         <div>
-          {!isOnline && (
-            <span className="badge bg-warning text-dark me-2">
-              ⚠ Offline Mode
-            </span>
+          <h2 className="mb-0">{dateDisplay}</h2>
+          {trainingLabel && (
+            <span className="badge bg-success mt-1" style={{ fontSize: '0.9rem' }}>{trainingLabel}</span>
           )}
-          {pendingSync && (
-            <span className="badge bg-info text-dark">
-              ⏳ Pending Sync
-            </span>
-          )}
-          {isOnline && !pendingSync && (
-            <span className="badge bg-success">
-              ✓ Synced
-            </span>
-          )}
+        </div>
+        <div>
+          {!isOnline && <span className="badge bg-warning text-dark me-2">⚠ Offline Mode</span>}
+          {pendingSync && <span className="badge bg-info text-dark">⏳ Pending Sync</span>}
+          {isOnline && !pendingSync && <span className="badge bg-success">✓ Synced</span>}
         </div>
       </div>
 
-      {!training || exerciseTemplate.length === 0 ? (
-        <div className="alert alert-info">No training scheduled for {weekday}</div>
+      {exerciseTemplate.length === 0 ? (
+        <div className="alert alert-info">{noTrainingMessage}</div>
       ) : (
         <div className="row g-4">
           {exerciseTemplate.map((exercise) => {
@@ -419,11 +365,8 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
             const mySetRecords = myRecord?.set_records || {}
             const currentSets = setsCounts[exercise.name] || exercise.sets
 
-            // Find last workout for this exercise
             const lastRecord = lastWorkouts.find(w => w.exercise_name === exercise.name)
             const lastSetRecords = lastRecord?.set_records || {}
-
-            // Get the last (final) set from previous workout
             const lastSetIndices = Object.keys(lastSetRecords).map(Number).sort((a, b) => b - a)
             const lastSetIndex = lastSetIndices.length > 0 ? lastSetIndices[0] : null
             const lastFinalSet = lastSetIndex !== null ? lastSetRecords[lastSetIndex] : {}
@@ -436,25 +379,18 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                       src={`/exercises/${exercise.image}`}
                       alt={exercise.name}
                       className="card-img-top"
-                      style={{
-                        height: '200px',
-                        width: '100%',
-                        objectFit: 'contain',
-                        backgroundColor: '#f8f9fa'
-                      }}
-                      onError={(e) => {
-                        e.target.style.display = 'none'
-                      }}
+                      style={{ height: '200px', width: '100%', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
+                      onError={(e) => { e.target.style.display = 'none' }}
                     />
                   )}
-                  <div className="card-header bg-primary text-white">
+                  <div className={`card-header text-white ${isTomek ? 'bg-success' : 'bg-primary'}`}>
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
                         <h5 className="mb-0">{exercise.name}</h5>
-                        <small>Target: {exercise.sets}x{exercise.reps}</small>
+                        <small>Target: {exercise.sets}×{exercise.reps}</small>
                       </div>
                       <button
-                        className="btn btn-success"
+                        className="btn btn-light btn-sm"
                         onClick={() => addSet(exercise.name)}
                         title="Add set"
                         style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
@@ -491,9 +427,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                   style={hasUserReps ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
                                     const value = e.target.value ? Number(e.target.value) : null
-                                    if (value !== null) {
-                                      saveSetRecord(exercise.name, setIndex, value, savedSet.weight || 0)
-                                    }
+                                    if (value !== null) saveSetRecord(exercise.name, setIndex, value, savedSet.weight || 0)
                                   }}
                                 />
                               </td>
@@ -506,9 +440,7 @@ export default function WorkoutList({ user, selectedDate: externalSelectedDate }
                                   style={hasUserWeight ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
                                     const value = e.target.value ? Number(e.target.value) : null
-                                    if (value !== null) {
-                                      saveSetRecord(exercise.name, setIndex, savedSet.reps || 0, value)
-                                    }
+                                    if (value !== null) saveSetRecord(exercise.name, setIndex, savedSet.reps || 0, value)
                                   }}
                                 />
                               </td>
