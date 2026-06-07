@@ -18,7 +18,9 @@ body {
 }
 
 .app > div {
+  overflow-y: auto;
   overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 html, body, #root {
