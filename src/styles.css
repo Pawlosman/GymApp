@@ -21,7 +21,8 @@ html, body, #root {
 
 .app {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  align-items: stretch;
 }
 
 .app > div {

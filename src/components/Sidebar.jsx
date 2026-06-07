@@ -111,7 +111,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
 
   if (!isMobile) {
     return (
-      <aside className="bg-body-tertiary border-end" style={{ width: '280px', minHeight: '100vh', padding: '20px' }}>
+      <aside className="bg-body-tertiary border-end" style={{ width: '280px', minHeight: '100%', padding: '20px', alignSelf: 'stretch' }}>
         <SidebarContent {...contentProps} onSelectDate={onSelectDate} />
       </aside>
     )
