@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function UserSelect({ onSelect }) {
   return (
-    <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+    <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
       <div className="text-center">
         <div className="d-flex gap-4 justify-content-center flex-wrap">
           <ProfileCard
@@ -36,7 +36,7 @@ function ProfileCard({ photo, label, color, onClick }) {
       style={{
         border: `3px solid ${color}`,
         borderRadius: '16px',
-        background: 'white',
+        background: 'var(--bs-body-bg)',
         cursor: 'pointer',
         width: '160px',
         padding: '12px',

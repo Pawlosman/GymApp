@@ -1,59 +1,18 @@
-/* ===== Light Mode Only Theme ===== */
 :root {
-  /* Amber primary colors */
-  --color-primary-50: #fffbeb;
-  --color-primary-100: #fef3c7;
-  --color-primary-200: #fde68a;
-  --color-primary-300: #fcd34d;
-  --color-primary-400: #fbbf24;
-  --color-primary-500: #f59e0b;
-  --color-primary-600: #d97706;
-  --color-primary-700: #b45309;
-  --color-primary-800: #92400e;
-  --color-primary-900: #78350f;
-
-  /* Zinc gray colors */
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f4f4f5;
-  --color-gray-200: #e4e4e7;
-  --color-gray-300: #d4d4d8;
-  --color-gray-400: #a1a1aa;
-  --color-gray-500: #71717a;
-  --color-gray-600: #52525b;
-  --color-gray-700: #3f3f46;
-  --color-gray-800: #27272a;
-  --color-gray-900: #18181b;
-  --color-gray-950: #09090b;
-
-  /* Light mode colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: var(--color-gray-50);
-  --bg-tertiary: var(--color-gray-100);
-  --bg-sidebar: var(--color-gray-50);
-  --text-primary: var(--color-gray-900);
-  --text-secondary: var(--color-gray-600);
-  --text-muted: var(--color-gray-500);
-  --border-color: var(--color-gray-200);
-  --border-color-strong: var(--color-gray-300);
-  --shadow-color: rgba(0, 0, 0, 0.1);
-
-  /* Accent colors */
-  --accent-primary: var(--color-primary-500);
-  --accent-primary-hover: var(--color-primary-600);
-  --accent-primary-light: var(--color-primary-100);
+  --bg-secondary: #1a1a2e;
+  --bg-sidebar: #16213e;
+  --border-color: #2d3748;
+  --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
 }
 
 html, body, #root {
@@ -63,13 +22,6 @@ html, body, #root {
 .app {
   display: flex;
   height: 100vh;
-  background-color: var(--bg-secondary);
-}
-
-.app > aside {
-  flex-shrink: 0;
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
 }
 
 .app > div {
@@ -77,55 +29,16 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-width: 0;
-}
-
-.navbar {
-  flex-shrink: 0;
-  box-shadow: 0 2px 4px var(--shadow-color);
-  background-color: var(--bg-primary) !important;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.workouts, .add-form input {
-  margin-right: 8px;
+  overflow-y: auto;
 }
 
 .error {
-  color: #dc3545;
+  color: #f87171;
 }
 
-.plan {
-  background: var(--bg-tertiary);
-  padding: 8px;
-  margin: 8px 0;
-  border-radius: 6px;
-}
-
-.planned ul {
-  margin: 6px 0 0 16px;
-}
-
-/* Mobile Responsive */
 @media (max-width: 768px) {
   .app {
     flex-direction: column;
-  }
-
-  .app > aside {
-    position: fixed;
-    left: -280px;
-    top: 0;
-    width: 280px;
-    height: 100vh;
-    z-index: 1000;
-    transition: left 0.3s ease;
-    border-right: 1px solid var(--border-color);
-    overflow-y: auto;
-    background-color: var(--bg-sidebar);
-  }
-
-  .app > aside.open {
-    left: 0;
   }
 
   .card {
@@ -134,10 +47,6 @@ html, body, #root {
 }
 
 @media (max-width: 576px) {
-  .app {
-    flex-direction: column;
-  }
-
   .card {
     margin-bottom: 1rem;
   }

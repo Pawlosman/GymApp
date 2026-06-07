@@ -48,8 +48,7 @@ export default function App() {
 
   const isSciatica = profile === 'sciatica'
 
-  const profileLabel = profile === 'tata' ? 'PRO Training' : profile === 'tomek' ? 'LITE Training' : 'Sciatica'
-  const profilePhoto = profile === 'tata' ? '/exercises/PRO.jpeg' : profile === 'tomek' ? '/exercises/LITE.jpg' : '/exercises/SCIATICA.jpg'
+  const profileLabel = profile === 'tata' ? '💪 Pro' : profile === 'tomek' ? '🏋️ Lite' : '🧘 Sciatica'
   const profileBadgeColor = profile === 'tata' ? 'bg-primary' : profile === 'tomek' ? 'bg-success' : 'bg-warning text-dark'
 
   return (
@@ -64,8 +63,7 @@ export default function App() {
         <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 sticky-top shadow-sm">
           <div className="container-fluid">
             <div className="d-flex gap-2 align-items-center" style={{ marginLeft: '50px' }}>
-              <span className={`badge me-2 d-flex align-items-center gap-1 ${profileBadgeColor}`} style={{ fontSize: '0.85rem', padding: '4px 8px' }}>
-                <img src={profilePhoto} alt="" style={{ width: 20, height: 20, objectFit: 'cover', borderRadius: '4px' }} />
+              <span className={`badge me-2 ${profileBadgeColor}`} style={{ fontSize: '0.85rem' }}>
                 {profileLabel}
               </span>
               <button

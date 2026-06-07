@@ -101,7 +101,6 @@
       "name": "Gluteal Stretch",
       "type": "timer",
       "duration": 30,
-      "bilateral": true,
       "images": ["1_gluteal_stretch.png"]
     },
     {
@@ -109,7 +108,6 @@
       "name": "Deep Gluteal Stretch",
       "type": "timer",
       "duration": 30,
-      "bilateral": true,
       "images": ["2_deep_gluteal_stretch.png"]
     },
     {
@@ -145,7 +143,6 @@
       "name": "Posterior Leg Stretch",
       "type": "timer",
       "duration": 30,
-      "bilateral": true,
       "images": ["7_posterior_leg_stretch.png"]
     },
     {
@@ -153,7 +150,6 @@
       "name": "Sciatic Nerve Flossing",
       "type": "reps",
       "reps": 10,
-      "bilateral": true,
       "images": ["8.1_sciatic_nerve_flossing.png", "8.2_sciatic_nerve_flossing.png"]
     },
     {
@@ -161,7 +157,6 @@
       "name": "Sciatic Nerve Flossing (Foot)",
       "type": "reps",
       "reps": 10,
-      "bilateral": true,
       "images": ["9.1_sciatic_nerve_flossing_foot.png", "9.2_sciatic_nerve_flossing_foot.png"]
     },
     {
@@ -176,8 +171,7 @@
       "name": "Rolling (Calf + Thigh + Glute)",
       "type": "reps",
       "reps": 10,
-      "bilateral": true,
-      "note": "10× calf, 10× thigh, 10× glute each leg",
+      "note": "10× calf, 10× thigh, 10× glute",
       "images": ["11.1_calf_rolling.png", "11.2_calf_rolling.png", "11.3_thigh_rolling.png", "11.4_thigh_rolling.png", "11.5_glute_rolling.png", "11.6_glute_rolling.png"]
     },
     {
@@ -185,7 +179,6 @@
       "name": "Glute Rolling (Ball)",
       "type": "reps",
       "reps": 10,
-      "bilateral": true,
       "images": ["12.1_glute_rolling_ball.png", "12.2_glute_rolling_ball.png"]
     }
   ]

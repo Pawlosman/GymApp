@@ -67,7 +67,7 @@ function AllImages({ images }) {
           key={i}
           src={`/exercises/${img}`}
           alt=""
-          style={{ width: '100%', display: 'block', objectFit: 'contain', maxHeight: '260px', backgroundColor: '#f8f9fa' }}
+          style={{ width: '100%', display: 'block', objectFit: 'contain', maxHeight: '260px' }}
           onError={e => { e.target.style.display = 'none' }}
         />
       ))}
@@ -228,21 +228,61 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
   const today = isoDate(new Date())
   const [selectedDate, setSelectedDate] = useState(today)
   const [completed, setCompleted] = useState({})
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [pendingSync, setPendingSync] = useState(false)
 
   useEffect(() => {
     if (externalDate) setSelectedDate(externalDate)
   }, [externalDate])
 
   useEffect(() => {
+    const on = () => { setIsOnline(true); syncPending() }
+    const off = () => setIsOnline(false)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  useEffect(() => {
     loadSession()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, user])
 
+  function localKey(date) { return `sciatica_${user?.id}_${date}` }
+  function pendingKey() { return `sciatica_pending_${user?.id}` }
+
+  function getPending() { try { return JSON.parse(localStorage.getItem(pendingKey()) || '[]') } catch { return [] } }
+
+  async function syncPending() {
+    if (!user || !navigator.onLine) return
+    const pending = getPending()
+    for (const date of pending) {
+      const raw = localStorage.getItem(localKey(date))
+      if (!raw) continue
+      try {
+        const comp = JSON.parse(raw)
+        const allDone = EXERCISES.every(ex =>
+          ex.bilateral ? comp[`${ex.id}_left`] && comp[`${ex.id}_right`] : comp[`${ex.id}_left`]
+        )
+        const payload = { user_id: user.id, date, completed: comp, all_done: allDone }
+        const { data: existing } = await supabase.from('sciatica_sessions').select('id').eq('user_id', user.id).eq('date', date).maybeSingle()
+        if (existing) await supabase.from('sciatica_sessions').update(payload).eq('id', existing.id)
+        else await supabase.from('sciatica_sessions').insert([payload])
+      } catch {}
+    }
+    localStorage.removeItem(pendingKey())
+    setPendingSync(false)
+  }
+
   async function loadSession() {
     setCompleted({})
-    const local = localStorage.getItem(`sciatica_${user?.id}_${selectedDate}`)
+    setPendingSync(false)
+    const pending = getPending()
+    const local = localStorage.getItem(localKey(selectedDate))
     if (local) {
       try { setCompleted(JSON.parse(local)) } catch {}
+      if (pending.includes(selectedDate)) setPendingSync(true)
     }
     if (navigator.onLine && user) {
       const { data } = await supabase
@@ -253,7 +293,8 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
         .maybeSingle()
       if (data?.completed) {
         setCompleted(data.completed)
-        localStorage.setItem(`sciatica_${user.id}_${selectedDate}`, JSON.stringify(data.completed))
+        localStorage.setItem(localKey(selectedDate), JSON.stringify(data.completed))
+        setPendingSync(false)
       }
     }
   }
@@ -261,25 +302,23 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
   async function markDone(key) {
     const updated = { ...completed, [key]: true }
     setCompleted(updated)
-    localStorage.setItem(`sciatica_${user?.id}_${selectedDate}`, JSON.stringify(updated))
+    localStorage.setItem(localKey(selectedDate), JSON.stringify(updated))
 
     if (navigator.onLine && user) {
-      const allDone = EXERCISES.every(ex => {
-        if (ex.bilateral) return updated[`${ex.id}_left`] && updated[`${ex.id}_right`]
-        return updated[`${ex.id}_left`]
-      })
+      const allDone = EXERCISES.every(ex =>
+        ex.bilateral ? updated[`${ex.id}_left`] && updated[`${ex.id}_right`] : updated[`${ex.id}_left`]
+      )
       const payload = { user_id: user.id, date: selectedDate, completed: updated, all_done: allDone }
-      const { data: existing } = await supabase
-        .from('sciatica_sessions')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('date', selectedDate)
-        .maybeSingle()
-      if (existing) {
-        await supabase.from('sciatica_sessions').update(payload).eq('id', existing.id)
-      } else {
-        await supabase.from('sciatica_sessions').insert([payload])
+      const { data: existing } = await supabase.from('sciatica_sessions').select('id').eq('user_id', user.id).eq('date', selectedDate).maybeSingle()
+      if (existing) await supabase.from('sciatica_sessions').update(payload).eq('id', existing.id)
+      else await supabase.from('sciatica_sessions').insert([payload])
+    } else {
+      const pending = getPending()
+      if (!pending.includes(selectedDate)) {
+        pending.push(selectedDate)
+        localStorage.setItem(pendingKey(), JSON.stringify(pending))
       }
+      setPendingSync(true)
     }
   }
 
@@ -297,7 +336,12 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
           <h2 className="mb-0">🧘 Sciatica</h2>
           <small className="text-muted">{formatDateDisplay(selectedDate)}</small>
         </div>
-        <span className="badge bg-secondary fs-6">{doneSteps}/{totalSteps} done</span>
+        <div className="d-flex gap-2 align-items-center">
+          <span className="badge bg-secondary">{doneSteps}/{totalSteps} done</span>
+          {!isOnline && <span className="badge bg-warning text-dark">⚠ Offline Mode</span>}
+          {isOnline && pendingSync && <span className="badge bg-info text-dark">⏳ Pending Sync</span>}
+          {isOnline && !pendingSync && <span className="badge bg-success">✓ Synced</span>}
+        </div>
       </div>
 
       {allDone && (
