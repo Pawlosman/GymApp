@@ -183,7 +183,7 @@ function TataSidebarContent({ days, currentTraining, trainingData, onSelectDate,
   return (
     <>
       <div className="mb-4">
-        <label className="form-label fw-bold text-primary">{currentTraining}</label>
+        <label className="form-label fw-bold text-primary">PRO Training</label>
         <strong className="d-block mb-2">Training Days</strong>
         <div className="d-flex flex-column gap-2">
           {days.map((d) => {
@@ -237,7 +237,7 @@ function TomekSidebarContent({ days, tomekTrainings, onSelectDate, todayIso, sel
   return (
     <>
       <div className="mb-4">
-        <label className="form-label fw-bold text-success">Tomek's Training</label>
+        <label className="form-label fw-bold text-success">LITE Training</label>
         <small className="d-block text-muted mb-2">Pick a day, then choose Training A or B</small>
         <div className="d-flex flex-column gap-1">
           {days.map((d) => {
