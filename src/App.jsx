@@ -10,16 +10,124 @@ import SciaticaStatistics from './components/SciaticaStatistics'
 
 const ADMIN_EMAIL = 'pawel.przenioslo@gmail.com'
 
+function timeAgo(isoStr) {
+  if (!isoStr) return 'Never'
+  const diff = Date.now() - new Date(isoStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  if (days < 30) return `${days}d ago`
+  return new Date(isoStr).toLocaleDateString()
+}
+
+function AdminPanel({ onClose }) {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteStatus, setInviteStatus] = useState(null)
+  const [inviting, setInviting] = useState(false)
+
+  useEffect(() => { fetchUsers() }, [])
+
+  async function fetchUsers() {
+    setLoading(true)
+    const { data, error } = await supabase.rpc('admin_get_users')
+    if (!error) setUsers(data || [])
+    setLoading(false)
+  }
+
+  async function handleInvite() {
+    if (!inviteEmail) return
+    setInviting(true)
+    setInviteStatus(null)
+    const { error } = await supabase.auth.resetPasswordForEmail(inviteEmail, {
+      redirectTo: window.location.origin
+    })
+    if (error) {
+      setInviteStatus({ ok: false, msg: error.message })
+    } else {
+      setInviteStatus({ ok: true, msg: `Invite sent to ${inviteEmail}` })
+      setInviteEmail('')
+    }
+    setInviting(false)
+  }
+
+  return (
+    <div className="container-fluid px-4 pt-3 pb-4">
+      <div className="card border-info" style={{ maxWidth: 600 }}>
+        <div className="card-header bg-info text-white d-flex justify-content-between align-items-center">
+          <span className="fw-bold">Admin Panel</span>
+          <button className="btn-close btn-close-white btn-sm" onClick={onClose} />
+        </div>
+        <div className="card-body">
+
+          <h6 className="mb-3">Users</h6>
+          {loading ? (
+            <div className="text-center py-3"><div className="spinner-border spinner-border-sm text-info" /></div>
+          ) : (
+            <table className="table table-sm mb-4">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Joined</th>
+                  <th>Last login</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td style={{ fontSize: '0.85rem', wordBreak: 'break-all' }}>{u.email}</td>
+                    <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }} className="text-muted">{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                      <span className={u.last_sign_in_at && (Date.now() - new Date(u.last_sign_in_at) < 86400000) ? 'text-success fw-bold' : 'text-muted'}>
+                        {timeAgo(u.last_sign_in_at)}
+                      </span>
+                      <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                        {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : '—'}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          <hr />
+
+          <h6 className="mb-2">Invite new user</h6>
+          <p className="text-muted small mb-2">They'll receive a link to set their password and log in.</p>
+          <div className="d-flex gap-2">
+            <input
+              type="email"
+              className="form-control form-control-sm"
+              placeholder="email@example.com"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleInvite()}
+            />
+            <button className="btn btn-info btn-sm text-white" onClick={handleInvite} disabled={inviting || !inviteEmail}>
+              {inviting ? '…' : 'Send invite'}
+            </button>
+          </div>
+          {inviteStatus && (
+            <div className={`mt-2 small ${inviteStatus.ok ? 'text-success' : 'text-danger'}`}>{inviteStatus.msg}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTraining, setSelectedTraining] = useState(null)
   const [currentPage, setCurrentPage] = useState('workouts')
-  const [showInvite, setShowInvite] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteStatus, setInviteStatus] = useState(null)
-  const [inviting, setInviting] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -47,22 +155,7 @@ export default function App() {
     setSelectedDate(null)
     setSelectedTraining(null)
     setCurrentPage('workouts')
-  }
-
-  async function handleInvite() {
-    if (!inviteEmail) return
-    setInviting(true)
-    setInviteStatus(null)
-    const { error } = await supabase.auth.resetPasswordForEmail(inviteEmail, {
-      redirectTo: window.location.origin
-    })
-    if (error) {
-      setInviteStatus({ ok: false, msg: error.message })
-    } else {
-      setInviteStatus({ ok: true, msg: `Invite sent to ${inviteEmail}` })
-      setInviteEmail('')
-    }
-    setInviting(false)
+    setShowAdmin(false)
   }
 
   if (!session) return <Login />
@@ -91,20 +184,20 @@ export default function App() {
               {profileLabel}
             </span>
             <button
-              className={`btn btn-sm ${currentPage === 'workouts' ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
-              onClick={() => setCurrentPage('workouts')}
+              className={`btn btn-sm ${currentPage === 'workouts' && !showAdmin ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
+              onClick={() => { setCurrentPage('workouts'); setShowAdmin(false) }}
             >
               {isSciatica ? 'Exercises' : 'Workouts'}
             </button>
             <button
-              className={`btn btn-sm ${currentPage === 'statistics' ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
-              onClick={() => setCurrentPage('statistics')}
+              className={`btn btn-sm ${currentPage === 'statistics' && !showAdmin ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
+              onClick={() => { setCurrentPage('statistics'); setShowAdmin(false) }}
             >
               Stats
             </button>
             {isAdmin && (
-              <button className="btn btn-outline-info btn-sm" onClick={() => setShowInvite(v => !v)}>
-                + Invite
+              <button className={`btn btn-sm ${showAdmin ? 'btn-info' : 'btn-outline-info'}`} onClick={() => setShowAdmin(v => !v)}>
+                Admin
               </button>
             )}
           </div>
@@ -114,34 +207,9 @@ export default function App() {
           </div>
         </nav>
 
-        {showInvite && isAdmin && (
-          <div className="container-fluid px-4 pt-3">
-            <div className="card border-info" style={{ maxWidth: 420 }}>
-              <div className="card-body">
-                <h6 className="card-title text-info mb-3">Invite a new user</h6>
-                <p className="text-muted small mb-2">They will receive a password reset link to set their password and log in.</p>
-                <div className="d-flex gap-2">
-                  <input
-                    type="email"
-                    className="form-control form-control-sm"
-                    placeholder="email@example.com"
-                    value={inviteEmail}
-                    onChange={e => setInviteEmail(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleInvite()}
-                  />
-                  <button className="btn btn-info btn-sm text-white" onClick={handleInvite} disabled={inviting || !inviteEmail}>
-                    {inviting ? '…' : 'Send'}
-                  </button>
-                </div>
-                {inviteStatus && (
-                  <div className={`mt-2 small ${inviteStatus.ok ? 'text-success' : 'text-danger'}`}>{inviteStatus.msg}</div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isSciatica ? (
+        {showAdmin && isAdmin ? (
+          <AdminPanel onClose={() => setShowAdmin(false)} />
+        ) : isSciatica ? (
           currentPage === 'workouts' ? (
             <SciaticaWorkout user={session.user} selectedDate={selectedDate} />
           ) : (
