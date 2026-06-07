@@ -111,7 +111,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
 
   if (!isMobile) {
     return (
-      <aside className="bg-light border-end" style={{ width: '280px', minHeight: '100vh', padding: '20px' }}>
+      <aside className="bg-body-tertiary border-end" style={{ width: '280px', minHeight: '100vh', padding: '20px' }}>
         <SidebarContent {...contentProps} onSelectDate={onSelectDate} />
       </aside>
     )
@@ -122,7 +122,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
       {toggleButton}
       {overlay}
       <aside
-        className="bg-light border-end position-fixed h-100 overflow-y-auto"
+        className="bg-body-tertiary border-end position-fixed h-100 overflow-y-auto"
         style={{
           width: '280px', padding: '20px', zIndex: 1100,
           left: isOpen ? 0 : '-280px', transition: 'left 0.25s ease', top: 0
