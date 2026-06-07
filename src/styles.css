@@ -1,44 +1,39 @@
-:root {
-  --bg-secondary: #1a1a2e;
-  --bg-sidebar: #16213e;
-  --border-color: #2d3748;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  overscroll-behavior: none;
-  overflow: hidden;
-}
-
-.app > div {
-  overflow-y: auto;
-  overscroll-behavior-y: none;
-  -webkit-overflow-scrolling: touch;
-}
-
 html, body, #root {
   height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .app {
   display: flex;
-  min-height: 100vh;
-  align-items: stretch;
+  height: 100%;
+}
+
+.app > aside {
+  flex-shrink: 0;
+  overflow-y: auto;
+  overscroll-behavior: none;
 }
 
 .app > div {
   flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  overflow-y: auto;
 }
 
 .error {
