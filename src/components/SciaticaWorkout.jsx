@@ -75,8 +75,27 @@ function AllImages({ images }) {
   )
 }
 
+const COUNTDOWN_LABELS = ['Ready', 'Set', 'Go!']
+
+function countdownBeep(step) {
+  try {
+    const ctx = getAudioCtx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = step === 2 ? 1200 : step === 1 ? 900 : 660
+    osc.type = 'sine'
+    gain.gain.setValueAtTime(0.5, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  } catch (e) {}
+}
+
 function TimerSide({ label, duration, done, onDone }) {
-  const [running, setRunning] = useState(false)
+  const [phase, setPhase] = useState('idle') // idle | countdown | running
+  const [countdown, setCountdown] = useState(3)
   const [remaining, setRemaining] = useState(duration)
   const intervalRef = useRef(null)
 
@@ -84,57 +103,76 @@ function TimerSide({ label, duration, done, onDone }) {
 
   function start() {
     if (done) return
-    setRunning(true)
+    setPhase('countdown')
+    setCountdown(3)
     setRemaining(duration)
+    let step = 0
+    countdownBeep(step)
     intervalRef.current = setInterval(() => {
-      setRemaining(prev => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current)
-          setRunning(false)
-          beep()
-          onDone()
-          return 0
-        }
-        tick()
-        return prev - 1
-      })
+      step++
+      if (step < 3) {
+        countdownBeep(step)
+        setCountdown(3 - step)
+      } else {
+        clearInterval(intervalRef.current)
+        setPhase('running')
+        let rem = duration
+        intervalRef.current = setInterval(() => {
+          rem--
+          setRemaining(rem)
+          if (rem <= 0) {
+            clearInterval(intervalRef.current)
+            setPhase('idle')
+            beep()
+            onDone()
+          } else {
+            tick()
+          }
+        }, 1000)
+      }
     }, 1000)
   }
 
   function reset() {
     clearInterval(intervalRef.current)
-    setRunning(false)
+    setPhase('idle')
     setRemaining(duration)
+    setCountdown(3)
   }
 
-  const pct = ((duration - remaining) / duration) * 100
+  const pct = phase === 'running' ? ((duration - remaining) / duration) * 100 : 0
   const r = 32
   const circ = 2 * Math.PI * r
+  const isRunning = phase === 'running'
+  const isCountdown = phase === 'countdown'
 
   return (
     <div className={`flex-fill text-center p-2 rounded border ${done ? 'border-success bg-success bg-opacity-10' : 'border-secondary'}`}>
-      <div className="fw-bold mb-2" style={{ fontSize: '0.85rem' }}>{label}</div>
+      {label && <div className="fw-bold mb-2" style={{ fontSize: '0.85rem' }}>{label}</div>}
       {done ? (
         <div className="text-success fw-bold fs-5">✓</div>
       ) : (
         <>
           <div style={{ position: 'relative', width: 74, height: 74, margin: '0 auto 8px' }}>
             <svg width="74" height="74" style={{ transform: 'rotate(-90deg)' }}>
-              <circle cx="37" cy="37" r={r} fill="none" stroke="#e9ecef" strokeWidth="7" />
+              <circle cx="37" cy="37" r={r} fill="none" stroke="#444" strokeWidth="7" />
               <circle
                 cx="37" cy="37" r={r} fill="none"
-                stroke={running ? '#ffc107' : '#6c757d'}
+                stroke={isRunning ? '#ffc107' : isCountdown ? '#17a2b8' : '#6c757d'}
                 strokeWidth="7"
                 strokeDasharray={circ}
-                strokeDashoffset={circ * (1 - pct / 100)}
-                style={{ transition: 'stroke-dashoffset 1s linear' }}
+                strokeDashoffset={isRunning ? circ * (1 - pct / 100) : circ}
+                style={{ transition: isRunning ? 'stroke-dashoffset 1s linear' : 'none' }}
               />
             </svg>
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: '1.1rem', fontWeight: 'bold' }}>
-              {remaining}s
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontWeight: 'bold', lineHeight: 1 }}>
+              {isCountdown
+                ? <span style={{ fontSize: '0.85rem', color: '#17a2b8' }}>{COUNTDOWN_LABELS[3 - countdown]}</span>
+                : <span style={{ fontSize: '1.1rem' }}>{remaining}s</span>
+              }
             </div>
           </div>
-          {!running ? (
+          {phase === 'idle' ? (
             <button className="btn btn-warning btn-sm fw-bold px-3" onClick={start}>▶ Start</button>
           ) : (
             <button className="btn btn-outline-secondary btn-sm" onClick={reset}>↺</button>

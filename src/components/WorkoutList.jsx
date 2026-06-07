@@ -336,8 +336,9 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
     ? (!selectedTraining ? 'Select Training A or B from the sidebar' : 'No exercises found for this training')
     : `No training scheduled for ${weekday}`
 
+  const profileDisplayName = profile === 'tata' ? 'PRO' : profile === 'tomek' ? 'LITE' : 'Sciatica'
   const trainingLabel = isTomek && selectedTraining
-    ? selectedTraining.replace('Tomek ', '')
+    ? selectedTraining.replace(/^Workout\s*/i, '')
     : null
 
   return (
@@ -345,6 +346,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="mb-0">{dateDisplay}</h2>
+          <span className="badge bg-secondary mt-1 me-1" style={{ fontSize: '0.9rem' }}>{profileDisplayName}</span>
           {trainingLabel && (
             <span className="badge bg-success mt-1" style={{ fontSize: '0.9rem' }}>{trainingLabel}</span>
           )}
