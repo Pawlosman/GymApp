@@ -43,11 +43,18 @@ function AdminPanel({ onClose }) {
     if (!inviteEmail) return
     setInviting(true)
     setInviteStatus(null)
-    const { error } = await supabase.auth.resetPasswordForEmail(inviteEmail, {
-      redirectTo: window.location.origin
+    const { data: { session: s } } = await supabase.auth.getSession()
+    const res = await fetch('https://xgogkjppmbdrinzmnzjm.supabase.co/functions/v1/invite-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${s.access_token}`
+      },
+      body: JSON.stringify({ email: inviteEmail })
     })
-    if (error) {
-      setInviteStatus({ ok: false, msg: error.message })
+    const json = await res.json()
+    if (!res.ok || json.error) {
+      setInviteStatus({ ok: false, msg: json.error || 'Failed to send invite' })
     } else {
       setInviteStatus({ ok: true, msg: `Invite sent to ${inviteEmail}` })
       setInviteEmail('')
