@@ -72,8 +72,9 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
 
   const [y, m] = month.split('-').map(Number)
   const isTomek = profile === 'tomek'
+  const isSciatica = profile === 'sciatica'
 
-  const days = isTomek ? allDaysForMonth(month) : daysForMonth(month)
+  const days = (isTomek || isSciatica) ? allDaysForMonth(month) : daysForMonth(month)
   const trainingInfo = getTrainingForMonth(m - 1)
   const currentTraining = trainingInfo?.trainingName || 'Training 1'
   const trainingData = trainingInfo?.training
@@ -105,7 +106,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   const contentProps = {
     month, setMonth, days, currentTraining, trainingData,
     onSelectDate: handleSelectDate, todayIso, selectedDate,
-    profile, selectedTraining, isTomek
+    profile, selectedTraining, isTomek, isSciatica
   }
 
   if (!isMobile) {
@@ -134,7 +135,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   )
 }
 
-function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek, isSciatica }) {
   const tomekTrainings = trainingsData.tomekTrainings
 
   return (
@@ -148,7 +149,14 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
         <input type="month" className="form-control form-control-sm" value={month} onChange={(e) => setMonth(e.target.value)} />
       </div>
 
-      {isTomek ? (
+      {isSciatica ? (
+        <SciaticaSidebarContent
+          days={days}
+          onSelectDate={onSelectDate}
+          todayIso={todayIso}
+          selectedDate={selectedDate}
+        />
+      ) : isTomek ? (
         <TomekSidebarContent
           days={days}
           tomekTrainings={tomekTrainings}
@@ -291,5 +299,36 @@ function TomekSidebarContent({ days, tomekTrainings, onSelectDate, todayIso, sel
         ))}
       </div>
     </>
+  )
+}
+
+function SciaticaSidebarContent({ days, onSelectDate, todayIso, selectedDate }) {
+  return (
+    <div className="mb-4">
+      <label className="form-label fw-bold text-warning">🧘 Sciatica</label>
+      <small className="d-block text-muted mb-2">Pick a day to do your session</small>
+      <div className="d-flex flex-column gap-1">
+        {days.map((d) => {
+          const isToday = d.iso === todayIso
+          const isSelected = selectedDate && d.iso === selectedDate
+          let btnClass = 'btn-outline-secondary'
+          if (isSelected) btnClass = 'btn-warning'
+          else if (isToday) btnClass = 'btn-outline-warning'
+          return (
+            <button
+              key={d.iso}
+              className={`btn text-start w-100 ${btnClass}`}
+              onClick={() => onSelectDate(d.iso)}
+              style={{ fontSize: '0.95rem', padding: '0.4rem 0.75rem' }}
+            >
+              <div className="d-flex justify-content-between align-items-center">
+                <span style={{ fontWeight: '500' }}>{d.iso}</span>
+                <span className={isSelected ? 'text-dark opacity-75' : 'text-muted'} style={{ fontSize: '0.85rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</span>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }

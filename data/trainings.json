@@ -72,17 +72,6 @@
     }
   },
   "tomekTrainings": {
-    "Workout A: Chest & Arms": {
-      "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-      "exercises": [
-        { "name": "A1 Flat Bench Press", "category": "LIFT", "sets": 3, "reps": "8-10" },
-        { "name": "A2 Barbell Bicep Curls", "category": "LIFT", "sets": 3, "reps": "8-10" },
-        { "name": "B1 Incline Dumbbell Press", "category": "UPPER", "sets": 3, "reps": "10-12" },
-        { "name": "B2 Tricep Overhead Cable Extensions", "category": "UPPER", "sets": 3, "reps": "10-12" },
-        { "name": "C1 Chest Flyes (Cable or Dumbbell)", "category": "UPPER", "sets": 3, "reps": 12 },
-        { "name": "C2 Dumbbell Hammer Curls", "category": "UPPER", "sets": 3, "reps": 12 }
-      ]
-    },
     "Workout B: Legs, Back & Shoulders": {
       "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
       "exercises": [
@@ -93,6 +82,104 @@
         { "name": "C1 Leg Extensions", "category": "LOWER", "sets": 2, "reps": 15 },
         { "name": "C2 Hanging Knee Raises or Planks", "category": "LOWER", "sets": 2, "reps": "Max hold" }
       ]
+    },
+    "Workout A: Chest & Arms": {
+      "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      "exercises": [
+        { "name": "A1 Flat Bench Press", "category": "LIFT", "sets": 3, "reps": "8-10" },
+        { "name": "A2 Barbell Bicep Curls", "category": "LIFT", "sets": 3, "reps": "8-10" },
+        { "name": "B1 Incline Dumbbell Press", "category": "UPPER", "sets": 3, "reps": "10-12" },
+        { "name": "B2 Tricep Overhead Cable Extensions", "category": "UPPER", "sets": 3, "reps": "10-12" },
+        { "name": "C1 Chest Flyes (Cable or Dumbbell)", "category": "UPPER", "sets": 3, "reps": 12 },
+        { "name": "C2 Dumbbell Hammer Curls", "category": "UPPER", "sets": 3, "reps": 12 }
+      ]
     }
-  }
+  },
+  "sciaticaExercises": [
+    {
+      "id": 1,
+      "name": "Gluteal Stretch",
+      "type": "timer",
+      "duration": 30,
+      "images": ["1_gluteal_stretch.png"]
+    },
+    {
+      "id": 2,
+      "name": "Deep Gluteal Stretch",
+      "type": "timer",
+      "duration": 30,
+      "images": ["2_deep_gluteal_stretch.png"]
+    },
+    {
+      "id": 3,
+      "name": "Cat Cow",
+      "type": "reps",
+      "reps": 10,
+      "images": ["3.1_cat_cow.png", "3.2_cat_cow.png"]
+    },
+    {
+      "id": 4,
+      "name": "Spinal Extension",
+      "type": "reps",
+      "reps": 10,
+      "images": ["4.1_spinal_extension.png", "4.2_spinal_extension.png"]
+    },
+    {
+      "id": 5,
+      "name": "Child's Pose",
+      "type": "timer",
+      "duration": 60,
+      "images": ["5_childs_pose.png"]
+    },
+    {
+      "id": 6,
+      "name": "Glute Bridge",
+      "type": "reps",
+      "reps": 10,
+      "images": ["6.1_glute_bridge.png", "6.2_glute_bridge.png"]
+    },
+    {
+      "id": 7,
+      "name": "Posterior Leg Stretch",
+      "type": "timer",
+      "duration": 30,
+      "images": ["7_posterior_leg_stretch.png"]
+    },
+    {
+      "id": 8,
+      "name": "Sciatic Nerve Flossing",
+      "type": "reps",
+      "reps": 10,
+      "images": ["8.1_sciatic_nerve_flossing.png", "8.2_sciatic_nerve_flossing.png"]
+    },
+    {
+      "id": 9,
+      "name": "Sciatic Nerve Flossing (Foot)",
+      "type": "reps",
+      "reps": 10,
+      "images": ["9.1_sciatic_nerve_flossing_foot.png", "9.2_sciatic_nerve_flossing_foot.png"]
+    },
+    {
+      "id": 10,
+      "name": "Pelvic Tilt & Abdominal Activation",
+      "type": "reps",
+      "reps": 10,
+      "images": ["10.1_pelvic_tilt_abdominal_activation.png", "10.2_pelvic_tilt_abdominal_activation.png"]
+    },
+    {
+      "id": 11,
+      "name": "Rolling (Calf + Thigh + Glute)",
+      "type": "reps",
+      "reps": 10,
+      "note": "10× calf, 10× thigh, 10× glute",
+      "images": ["11.1_calf_rolling.png", "11.2_calf_rolling.png", "11.3_thigh_rolling.png", "11.4_thigh_rolling.png", "11.5_glute_rolling.png", "11.6_glute_rolling.png"]
+    },
+    {
+      "id": 12,
+      "name": "Glute Rolling (Ball)",
+      "type": "reps",
+      "reps": 10,
+      "images": ["12.1_glute_rolling_ball.png", "12.2_glute_rolling_ball.png"]
+    }
+  ]
 }

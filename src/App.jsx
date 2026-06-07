@@ -5,12 +5,14 @@ import UserSelect from './components/UserSelect'
 import WorkoutList from './components/WorkoutList'
 import Sidebar from './components/Sidebar'
 import Statistics from './components/Statistics'
+import SciaticaWorkout from './components/SciaticaWorkout'
+import SciaticaStatistics from './components/SciaticaStatistics'
 
 export default function App() {
   const [session, setSession] = useState(null)
-  const [profile, setProfile] = useState(null) // 'tata' | 'tomek'
+  const [profile, setProfile] = useState(null) // 'tata' | 'tomek' | 'sciatica'
   const [selectedDate, setSelectedDate] = useState(null)
-  const [selectedTraining, setSelectedTraining] = useState(null) // for Tomek: 'Workout A: Chest & Arms' | 'Workout B: Legs, Back & Shoulders'
+  const [selectedTraining, setSelectedTraining] = useState(null)
   const [currentPage, setCurrentPage] = useState('workouts')
 
   useEffect(() => {
@@ -34,8 +36,20 @@ export default function App() {
     supabase.auth.signOut()
   }
 
+  function handleSwitchUser() {
+    setProfile(null)
+    setSelectedDate(null)
+    setSelectedTraining(null)
+    setCurrentPage('workouts')
+  }
+
   if (!session) return <Login />
   if (!profile) return <UserSelect onSelect={setProfile} />
+
+  const isSciatica = profile === 'sciatica'
+
+  const profileLabel = profile === 'tata' ? '💪 Pro' : profile === 'tomek' ? '🏋️ Lite' : '🧘 Sciatica'
+  const profileBadgeColor = profile === 'tata' ? 'bg-primary' : profile === 'tomek' ? 'bg-success' : 'bg-warning text-dark'
 
   return (
     <div className="app">
@@ -49,28 +63,25 @@ export default function App() {
         <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 sticky-top shadow-sm">
           <div className="container-fluid">
             <div className="d-flex gap-2 align-items-center" style={{ marginLeft: '50px' }}>
-              <span className="badge bg-secondary me-2" style={{ fontSize: '0.85rem' }}>
-                {profile === 'tata' ? '💪 Tata' : '🏋️ Tomek'}
+              <span className={`badge me-2 ${profileBadgeColor}`} style={{ fontSize: '0.85rem' }}>
+                {profileLabel}
               </span>
               <button
-                className={`btn btn-sm ${currentPage === 'workouts' ? 'btn-primary' : 'btn-outline-primary'}`}
+                className={`btn btn-sm ${currentPage === 'workouts' ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
                 onClick={() => setCurrentPage('workouts')}
               >
-                Workouts
+                {isSciatica ? 'Exercises' : 'Workouts'}
               </button>
               <button
-                className={`btn btn-sm ${currentPage === 'statistics' ? 'btn-primary' : 'btn-outline-primary'}`}
+                className={`btn btn-sm ${currentPage === 'statistics' ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
                 onClick={() => setCurrentPage('statistics')}
               >
                 Statistics
               </button>
             </div>
             <div className="ms-auto d-flex gap-2">
-              <button
-                className="btn btn-outline-secondary btn-sm"
-                onClick={() => { setProfile(null); setSelectedDate(null); setSelectedTraining(null) }}
-              >
-                Switch User
+              <button className="btn btn-outline-secondary btn-sm" onClick={handleSwitchUser}>
+                Switch
               </button>
               <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>
                 Logout
@@ -78,15 +89,24 @@ export default function App() {
             </div>
           </div>
         </nav>
-        {currentPage === 'workouts' ? (
-          <WorkoutList
-            user={session.user}
-            profile={profile}
-            selectedDate={selectedDate}
-            selectedTraining={selectedTraining}
-          />
+
+        {isSciatica ? (
+          currentPage === 'workouts' ? (
+            <SciaticaWorkout user={session.user} selectedDate={selectedDate} />
+          ) : (
+            <SciaticaStatistics user={session.user} />
+          )
         ) : (
-          <Statistics user={session.user} profile={profile} />
+          currentPage === 'workouts' ? (
+            <WorkoutList
+              user={session.user}
+              profile={profile}
+              selectedDate={selectedDate}
+              selectedTraining={selectedTraining}
+            />
+          ) : (
+            <Statistics user={session.user} profile={profile} />
+          )
         )}
       </div>
     </div>
