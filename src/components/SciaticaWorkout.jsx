@@ -94,7 +94,7 @@ function countdownBeep(step) {
 }
 
 function TimerSide({ label, duration, done, onDone }) {
-  const [phase, setPhase] = useState('idle') // idle | countdown | running
+  const [phase, setPhase] = useState('idle')
   const [countdown, setCountdown] = useState(3)
   const [remaining, setRemaining] = useState(duration)
   const intervalRef = useRef(null)
@@ -212,50 +212,25 @@ function TimerExercise({ exercise, doneLeft, doneRight, onDoneLeft, onDoneRight 
   )
 }
 
-function RepsExercise({ exercise, doneLeft, doneRight, onDoneLeft, onDoneRight }) {
-  const allDone = exercise.bilateral ? (doneLeft && doneRight) : doneLeft
-
+function RepsExercise({ exercise, doneLeft, onDoneLeft }) {
   return (
-    <div className={`card ${allDone ? 'border-success' : ''}`}>
+    <div className={`card ${doneLeft ? 'border-success' : ''}`}>
       <AllImages images={exercise.images} />
-      <div className={`card-header text-white ${allDone ? 'bg-success' : 'bg-info'}`}>
+      <div className={`card-header text-white ${doneLeft ? 'bg-success' : 'bg-info'}`}>
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <h6 className="mb-0 fw-bold">{exercise.id}. {exercise.name}</h6>
             <small>{exercise.note || `${exercise.reps} reps${exercise.bilateral ? ' each leg' : ''}`}</small>
           </div>
-          {allDone && <span style={{ fontSize: '1.4rem' }}>✓</span>}
+          {doneLeft && <span style={{ fontSize: '1.4rem' }}>✓</span>}
         </div>
       </div>
-      <div className="card-body">
-        {exercise.bilateral ? (
-          <div className="d-flex gap-2">
-            <div className={`flex-fill text-center p-2 rounded border ${doneLeft ? 'border-success bg-success bg-opacity-10' : 'border-secondary'}`}>
-              <div className="fw-bold mb-2" style={{ fontSize: '0.85rem' }}>Left leg</div>
-              {doneLeft ? (
-                <div className="text-success fw-bold fs-5">✓</div>
-              ) : (
-                <button className="btn btn-info text-white btn-sm fw-bold px-3" onClick={onDoneLeft}>✓ Done</button>
-              )}
-            </div>
-            <div className={`flex-fill text-center p-2 rounded border ${doneRight ? 'border-success bg-success bg-opacity-10' : 'border-secondary'}`}>
-              <div className="fw-bold mb-2" style={{ fontSize: '0.85rem' }}>Right leg</div>
-              {doneRight ? (
-                <div className="text-success fw-bold fs-5">✓</div>
-              ) : (
-                <button className="btn btn-info text-white btn-sm fw-bold px-3" onClick={onDoneRight}>✓ Done</button>
-              )}
-            </div>
-          </div>
+      <div className="card-body text-center">
+        <div className="text-muted mb-2" style={{ fontSize: '1.1rem' }}>{exercise.note || `${exercise.reps}×`}</div>
+        {doneLeft ? (
+          <div className="text-success fw-bold fs-5">Done! ✓</div>
         ) : (
-          <div className="text-center">
-            <div className="text-muted mb-2" style={{ fontSize: '1.1rem' }}>{exercise.note || `${exercise.reps}×`}</div>
-            {doneLeft ? (
-              <div className="text-success fw-bold fs-5">Done! ✓</div>
-            ) : (
-              <button className="btn btn-info text-white fw-bold px-4" onClick={onDoneLeft}>✓ Done</button>
-            )}
-          </div>
+          <button className="btn btn-info text-white fw-bold px-4" onClick={onDoneLeft}>✓ Done</button>
         )}
       </div>
     </div>
@@ -301,7 +276,7 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
       try {
         const comp = JSON.parse(raw)
         const allDone = EXERCISES.every(ex =>
-          ex.bilateral ? comp[`${ex.id}_left`] && comp[`${ex.id}_right`] : comp[`${ex.id}_left`]
+          (ex.type === 'timer' && ex.bilateral) ? comp[`${ex.id}_left`] && comp[`${ex.id}_right`] : comp[`${ex.id}_left`]
         )
         const payload = { user_id: user.id, date, completed: comp, all_done: allDone }
         const { data: existing } = await supabase.from('sciatica_sessions').select('id').eq('user_id', user.id).eq('date', date).maybeSingle()
@@ -344,7 +319,7 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
 
     if (navigator.onLine && user) {
       const allDone = EXERCISES.every(ex =>
-        ex.bilateral ? updated[`${ex.id}_left`] && updated[`${ex.id}_right`] : updated[`${ex.id}_left`]
+        (ex.type === 'timer' && ex.bilateral) ? updated[`${ex.id}_left`] && updated[`${ex.id}_right`] : updated[`${ex.id}_left`]
       )
       const payload = { user_id: user.id, date: selectedDate, completed: updated, all_done: allDone }
       const { data: existing } = await supabase.from('sciatica_sessions').select('id').eq('user_id', user.id).eq('date', selectedDate).maybeSingle()
@@ -360,9 +335,9 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
     }
   }
 
-  const totalSteps = EXERCISES.reduce((sum, ex) => sum + (ex.bilateral ? 2 : 1), 0)
+  const totalSteps = EXERCISES.reduce((sum, ex) => sum + (ex.type === 'timer' && ex.bilateral ? 2 : 1), 0)
   const doneSteps = EXERCISES.reduce((sum, ex) => {
-    if (ex.bilateral) return sum + (completed[`${ex.id}_left`] ? 1 : 0) + (completed[`${ex.id}_right`] ? 1 : 0)
+    if (ex.type === 'timer' && ex.bilateral) return sum + (completed[`${ex.id}_left`] ? 1 : 0) + (completed[`${ex.id}_right`] ? 1 : 0)
     return sum + (completed[`${ex.id}_left`] ? 1 : 0)
   }, 0)
   const allDone = doneSteps === totalSteps
@@ -404,9 +379,7 @@ export default function SciaticaWorkout({ user, selectedDate: externalDate }) {
               key={exercise.id}
               exercise={exercise}
               doneLeft={!!completed[`${exercise.id}_left`]}
-              doneRight={!!completed[`${exercise.id}_right`]}
               onDoneLeft={() => markDone(`${exercise.id}_left`)}
-              onDoneRight={() => markDone(`${exercise.id}_right`)}
             />
           )
         ))}
