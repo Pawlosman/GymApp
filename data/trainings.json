@@ -187,6 +187,13 @@
       "reps": 10,
       "bilateral": true,
       "images": ["12.1_glute_rolling_ball.png", "12.2_glute_rolling_ball.png"]
+    },
+    {
+      "id": 13,
+      "name": "Supine Spinal Twist",
+      "type": "reps",
+      "reps": 10,
+      "images": ["13_rotacja_kregoslupa.webp"]
     }
   ]
 }
