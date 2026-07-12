@@ -8,6 +8,7 @@ import Statistics from './components/Statistics'
 import SciaticaWorkout from './components/SciaticaWorkout'
 import SciaticaStatistics from './components/SciaticaStatistics'
 import CalisthenicsWorkout from './components/CalisthenicsWorkout'
+import CalisthenicsStatistics from './components/CalisthenicsStatistics'
 
 const ADMIN_EMAIL = 'pawel.przenioslo@gmail.com'
 
@@ -227,7 +228,11 @@ export default function App() {
             <SciaticaStatistics user={session.user} />
           )
         ) : isCalisthenics ? (
-          <CalisthenicsWorkout user={session.user} selectedDate={selectedDate} />
+          currentPage === 'workouts' ? (
+            <CalisthenicsWorkout user={session.user} selectedDate={selectedDate} />
+          ) : (
+            <CalisthenicsStatistics user={session.user} />
+          )
         ) : (
           currentPage === 'workouts' ? (
             <WorkoutList
