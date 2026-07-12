@@ -173,7 +173,7 @@ function SetTracker({ exercise, setsDone, onSetDone, planKey }) {
       <img
         src={`/exercises/${exercise.image}`}
         alt=""
-        style={{ width: '100%', objectFit: 'cover', maxHeight: '220px', display: 'block' }}
+        style={{ width: '100%', objectFit: 'contain', maxHeight: '300px', display: 'block', background: 'var(--bs-body-bg)' }}
         onError={e => { e.target.style.display = 'none' }}
       />
       <div className={`card-header ${isDone ? 'bg-success text-white' : 'bg-dark text-white'}`}>
