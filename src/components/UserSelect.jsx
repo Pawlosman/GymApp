@@ -23,6 +23,12 @@ export default function UserSelect({ onSelect }) {
             color="#ffc107"
             onClick={() => onSelect('sciatica')}
           />
+          <ProfileCard
+            photo="/exercises/CALISTHENICS.webp"
+            label="Calisthenics"
+            color="#fd7e14"
+            onClick={() => onSelect('calisthenics')}
+          />
         </div>
       </div>
     </div>

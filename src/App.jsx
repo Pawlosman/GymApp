@@ -7,6 +7,7 @@ import Sidebar from './components/Sidebar'
 import Statistics from './components/Statistics'
 import SciaticaWorkout from './components/SciaticaWorkout'
 import SciaticaStatistics from './components/SciaticaStatistics'
+import CalisthenicsWorkout from './components/CalisthenicsWorkout'
 
 const ADMIN_EMAIL = 'pawel.przenioslo@gmail.com'
 
@@ -169,11 +170,12 @@ export default function App() {
   if (!profile) return <UserSelect onSelect={setProfile} />
 
   const isSciatica = profile === 'sciatica'
+  const isCalisthenics = profile === 'calisthenics'
   const isAdmin = session.user.email === ADMIN_EMAIL
 
-  const profileLabel = profile === 'tata' ? 'PRO Training' : profile === 'tomek' ? 'LITE Training' : 'Sciatica'
-  const profilePhoto = profile === 'tata' ? '/exercises/PRO.jpeg' : profile === 'tomek' ? '/exercises/LITE.jpg' : '/exercises/SCIATICA.jpg'
-  const profileBadgeColor = profile === 'tata' ? 'bg-primary' : profile === 'tomek' ? 'bg-success' : 'bg-warning text-dark'
+  const profileLabel = profile === 'tata' ? 'PRO Training' : profile === 'tomek' ? 'LITE Training' : profile === 'sciatica' ? 'Sciatica' : 'Calisthenics'
+  const profilePhoto = profile === 'tata' ? '/exercises/PRO.jpeg' : profile === 'tomek' ? '/exercises/LITE.jpg' : profile === 'sciatica' ? '/exercises/SCIATICA.jpg' : '/exercises/CALISTHENICS.webp'
+  const profileBadgeColor = profile === 'tata' ? 'bg-primary' : profile === 'tomek' ? 'bg-success' : profile === 'sciatica' ? 'bg-warning text-dark' : 'bg-orange text-white'
 
   return (
     <div className="app">
@@ -191,13 +193,15 @@ export default function App() {
               {profileLabel}
             </span>
             <button
-              className={`btn btn-sm ${currentPage === 'workouts' && !showAdmin ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
+              className={`btn btn-sm ${currentPage === 'workouts' && !showAdmin ? (isSciatica ? 'btn-warning' : isCalisthenics ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : isCalisthenics ? 'btn-outline-warning' : 'btn-outline-primary')}`}
+              style={isCalisthenics ? { color: currentPage === 'workouts' && !showAdmin ? undefined : '#fd7e14', borderColor: '#fd7e14' } : {}}
               onClick={() => { setCurrentPage('workouts'); setShowAdmin(false) }}
             >
-              {isSciatica ? 'Exercises' : 'Workouts'}
+              {isSciatica ? 'Exercises' : isCalisthenics ? 'Workout' : 'Workouts'}
             </button>
             <button
-              className={`btn btn-sm ${currentPage === 'statistics' && !showAdmin ? (isSciatica ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : 'btn-outline-primary')}`}
+              className={`btn btn-sm ${currentPage === 'statistics' && !showAdmin ? (isSciatica ? 'btn-warning' : isCalisthenics ? 'btn-warning' : 'btn-primary') : (isSciatica ? 'btn-outline-warning' : isCalisthenics ? 'btn-outline-warning' : 'btn-outline-primary')}`}
+              style={isCalisthenics ? { color: currentPage === 'statistics' && !showAdmin ? undefined : '#fd7e14', borderColor: '#fd7e14' } : {}}
               onClick={() => { setCurrentPage('statistics'); setShowAdmin(false) }}
             >
               Stats
@@ -222,6 +226,8 @@ export default function App() {
           ) : (
             <SciaticaStatistics user={session.user} />
           )
+        ) : isCalisthenics ? (
+          <CalisthenicsWorkout user={session.user} selectedDate={selectedDate} />
         ) : (
           currentPage === 'workouts' ? (
             <WorkoutList

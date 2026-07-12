@@ -195,5 +195,22 @@
       "reps": 10,
       "images": ["13_rotacja_kregoslupa.webp"]
     }
-  ]
+  ],
+  "calisthenicsPlans": {
+    "Calisthenics Plan 1": [
+      { "id": 1, "name": "Burpees", "type": "reps", "reps": 5, "sets": 4, "image": "K1.1_Burpees.jpg" },
+      { "id": 2, "name": "Neutral-Grip Pull-Ups (or Negative Pull-Ups)", "type": "reps", "reps": 6, "sets": 4, "image": "K1.2_Neutral_Grip_Pull_Up.jpg" },
+      { "id": 3, "name": "Underhand Inverted Rows", "type": "reps", "reps": 8, "sets": 4, "image": "K1.3_Underhand Inverted Row.webp" },
+      { "id": 4, "name": "Bench Dips (Straight-Leg)", "type": "reps", "reps": 10, "sets": 4, "image": "K2.5_Bent-Knee_Dips.webp" },
+      { "id": 5, "name": "Jump Squats", "type": "reps", "reps": 10, "sets": 4, "image": "K1.4_double_jump_squat.webp" },
+      { "id": 6, "name": "Close-Grip Push-Ups", "type": "reps", "reps": 10, "sets": 4, "image": "K1.5_Close_Grip_Push_Up.jpg" }
+    ],
+    "Calisthenics Plan 2": [
+      { "id": 1, "name": "Hanging Leg Raises", "type": "reps", "reps": 10, "sets": 5, "image": "K2.1_hanging_leg_rises.png" },
+      { "id": 2, "name": "Slow Mountain Climbers", "type": "reps", "reps": 20, "sets": 5, "image": "K2.2_mountain_climbers_slow.webp" },
+      { "id": 3, "name": "Forearm Plank (or High Plank)", "type": "timer", "duration": 60, "sets": 4, "image": "K2.3_forearm_plank.webp" },
+      { "id": 4, "name": "Burpees with a Push-Up", "type": "reps", "reps": 5, "sets": 5, "image": "K2.4_burpees_push_up.jpg" },
+      { "id": 5, "name": "Bent-Knee Dips", "type": "reps", "reps": 10, "sets": 4, "image": "K2.5_Bent-Knee_Dips.webp" }
+    ]
+  }
 }
