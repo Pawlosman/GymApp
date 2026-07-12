@@ -73,8 +73,9 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   const [y, m] = month.split('-').map(Number)
   const isTomek = profile === 'tomek'
   const isSciatica = profile === 'sciatica'
+  const isCalisthenics = profile === 'calisthenics'
 
-  const days = (isTomek || isSciatica) ? allDaysForMonth(month) : daysForMonth(month)
+  const days = (isTomek || isSciatica || isCalisthenics) ? allDaysForMonth(month) : daysForMonth(month)
   const trainingInfo = getTrainingForMonth(m - 1)
   const currentTraining = trainingInfo?.trainingName || 'Training 1'
   const trainingData = trainingInfo?.training
@@ -106,7 +107,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   const contentProps = {
     month, setMonth, days, currentTraining, trainingData,
     onSelectDate: handleSelectDate, todayIso, selectedDate,
-    profile, selectedTraining, isTomek, isSciatica
+    profile, selectedTraining, isTomek, isSciatica, isCalisthenics
   }
 
   if (!isMobile) {
@@ -135,7 +136,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   )
 }
 
-function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek, isSciatica }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek, isSciatica, isCalisthenics }) {
   const tomekTrainings = trainingsData.tomekTrainings
 
   return (
@@ -149,7 +150,14 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
         <input type="month" className="form-control form-control-sm" value={month} onChange={(e) => setMonth(e.target.value)} />
       </div>
 
-      {isSciatica ? (
+      {isCalisthenics ? (
+        <CalisthenicsSidebarContent
+          days={days}
+          onSelectDate={onSelectDate}
+          todayIso={todayIso}
+          selectedDate={selectedDate}
+        />
+      ) : isSciatica ? (
         <SciaticaSidebarContent
           days={days}
           onSelectDate={onSelectDate}
@@ -293,6 +301,58 @@ function TomekSidebarContent({ days, tomekTrainings, onSelectDate, todayIso, sel
             <ul className="small ps-3 mb-2">
               {tData.exercises.map((t, i) => (
                 <li key={i} className="text-muted">{t.name} — {t.sets}×{t.reps}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function CalisthenicsSidebarContent({ days, onSelectDate, todayIso, selectedDate }) {
+  const plans = trainingsData.calisthenicsPlans
+  return (
+    <>
+      <div className="mb-4">
+        <label className="form-label fw-bold" style={{ color: '#fd7e14' }}>Calisthenics</label>
+        <small className="d-block text-muted mb-2">Pick a day for your session</small>
+        <div className="d-flex flex-column gap-1">
+          {days.map((d) => {
+            const isToday = d.iso === todayIso
+            const isSelected = selectedDate && d.iso === selectedDate
+            let btnClass = 'btn-outline-secondary'
+            if (isSelected) btnClass = 'btn-warning'
+            else if (isToday) btnClass = 'btn-outline-warning'
+            return (
+              <button
+                key={d.iso}
+                className={`btn text-start w-100 ${btnClass}`}
+                onClick={() => onSelectDate(d.iso)}
+                style={{ fontSize: '0.95rem', padding: '0.4rem 0.75rem' }}
+              >
+                <div className="d-flex justify-content-between align-items-center">
+                  <span style={{ fontWeight: '500' }}>{d.iso}</span>
+                  <span className={isSelected ? 'text-dark opacity-75' : 'text-muted'} style={{ fontSize: '0.85rem' }}>{WEEKDAY_NAMES[d.weekday - 1]}</span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <hr />
+
+      <div>
+        <strong className="d-block mb-3">Plans</strong>
+        {Object.entries(plans).map(([planName, exercises]) => (
+          <div key={planName} className="mb-3">
+            <em className="d-block fw-bold" style={{ color: '#fd7e14' }}>{planName}</em>
+            <ul className="small ps-3 mb-2">
+              {exercises.map((ex) => (
+                <li key={ex.id} className="text-muted">
+                  {ex.name} — {ex.type === 'timer' ? `${ex.duration}s` : `${ex.reps} reps`} × {ex.sets}
+                </li>
               ))}
             </ul>
           </div>
