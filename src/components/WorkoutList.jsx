@@ -257,17 +257,41 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
       Object.keys(updatedSetRecords).map(Number).sort((a, b) => a - b).forEach((oldIndex, newIndex) => {
         reindexed[newIndex] = updatedSetRecords[oldIndex]
       })
-      const updatedWorkouts = workouts.map(w =>
-        w.exercise_name === exerciseName ? { ...w, set_records: reindexed } : w
-      )
-      setWorkouts(updatedWorkouts)
-      saveToLocalStorage(updatedWorkouts)
-      if (navigator.onLine && !String(myRecord.id).startsWith('temp_')) {
-        supabase.from('workouts').update({ set_records: reindexed }).eq('id', myRecord.id)
-          .then(({ error }) => { if (!error) clearPendingSync() })
-      }
+      persistSetRecords(myRecord, reindexed)
     }
     setSetsCounts(prev => ({ ...prev, [exerciseName]: Math.max(1, (prev[exerciseName] || 1) - 1) }))
+  }
+
+  // Saves the exercise's set records; when no sets are left the whole record is deleted,
+  // so an exercise cleared by mistake doesn't count as done
+  function persistSetRecords(myRecord, setRecords) {
+    const isEmpty = Object.keys(setRecords).length === 0
+    const updatedWorkouts = isEmpty
+      ? workouts.filter(w => w.exercise_name !== myRecord.exercise_name)
+      : workouts.map(w => w.exercise_name === myRecord.exercise_name ? { ...w, set_records: setRecords } : w)
+    setWorkouts(updatedWorkouts)
+    saveToLocalStorage(updatedWorkouts)
+    if (navigator.onLine && !String(myRecord.id).startsWith('temp_')) {
+      const request = isEmpty
+        ? supabase.from('workouts').delete().eq('id', myRecord.id)
+        : supabase.from('workouts').update({ set_records: setRecords }).eq('id', myRecord.id)
+      request.then(({ error }) => {
+        if (error) console.error('Failed to update set records:', error)
+        else clearPendingSync()
+      })
+    }
+  }
+
+  // Clearing an input removes that value; a set with neither reps nor weight is removed
+  function clearSetValue(exerciseName, setIndex, field) {
+    const myRecord = workouts.find(w => w.exercise_name === exerciseName)
+    const current = myRecord?.set_records?.[setIndex]
+    if (!current || !current[field]) return
+    const other = field === 'reps' ? 'weight' : 'reps'
+    const updatedSetRecords = { ...myRecord.set_records }
+    if (current[other]) updatedSetRecords[setIndex] = { ...current, [field]: 0 }
+    else delete updatedSetRecords[setIndex]
+    persistSetRecords(myRecord, updatedSetRecords)
   }
 
   function clearPendingSync() {
@@ -437,6 +461,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
                                   onBlur={(e) => {
                                     const value = e.target.value ? Number(e.target.value) : null
                                     if (value !== null) saveSetRecord(exercise.name, setIndex, value, savedSet.weight || 0)
+                                    else clearSetValue(exercise.name, setIndex, 'reps')
                                   }}
                                 />
                               </td>
@@ -450,6 +475,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
                                   onBlur={(e) => {
                                     const value = e.target.value ? Number(e.target.value) : null
                                     if (value !== null) saveSetRecord(exercise.name, setIndex, savedSet.reps || 0, value)
+                                    else clearSetValue(exercise.name, setIndex, 'weight')
                                   }}
                                 />
                               </td>
