@@ -26,6 +26,18 @@ function formatDateDisplay(isoDateStr) {
   return `${dayName} ${day}/${month}/${year}`
 }
 
+// Every PRO exercise from all trainings, days and months (first definition wins)
+const ALL_PRO_EXERCISES = (() => {
+  const byName = new Map()
+  for (const training of Object.values(trainingsData.trainings)) {
+    for (const [key, exercises] of Object.entries(training)) {
+      if (key === 'months' || !Array.isArray(exercises)) continue
+      exercises.forEach(ex => { if (!byName.has(ex.name)) byName.set(ex.name, ex) })
+    }
+  }
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name))
+})()
+
 function getTrainingForMonth(monthIndex) {
   const monthName = MONTH_NAMES[monthIndex]
   for (const [trainingName, training] of Object.entries(trainingsData.trainings)) {
@@ -42,6 +54,9 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
   const [selectedDate, setSelectedDate] = useState(todayDate)
   const [workouts, setWorkouts] = useState([])
   const [lastWorkouts, setLastWorkouts] = useState([])
+  const [allLastWorkouts, setAllLastWorkouts] = useState([])
+  const [addedExercises, setAddedExercises] = useState([])
+  const [exerciseToAdd, setExerciseToAdd] = useState('')
   const [setsCounts, setSetsCounts] = useState({})
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingSync, setPendingSync] = useState(false)
@@ -243,6 +258,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
         // PRO: suggest results from the same weekday (previous Saturday for a Saturday, etc.)
         const weekday = getWeekdayName(selectedDate)
         setLastWorkouts(isTomek ? data : data.filter(w => getWeekdayName(w.date) === weekday))
+        setAllLastWorkouts(data)
       }
     } catch (e) {
       console.error('Failed to fetch last workouts:', e)
@@ -293,6 +309,63 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
     setSetsCounts(initialCounts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, weekday, selectedTraining])
+
+  // PRO: extra exercises added to this day on top of the template (e.g. when a machine is busy).
+  // They are kept locally until a result is saved; afterwards the saved record keeps them on the day.
+  function getAddedExercisesKey() {
+    return `extra_exercises_${profile}_${user?.id}_${selectedDate}`
+  }
+
+  useEffect(() => {
+    try {
+      setAddedExercises(JSON.parse(localStorage.getItem(getAddedExercisesKey()) || '[]'))
+    } catch (e) {
+      setAddedExercises([])
+    }
+    setExerciseToAdd('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, profile, user?.id])
+
+  function saveAddedExercises(names) {
+    setAddedExercises(names)
+    try {
+      if (names.length > 0) localStorage.setItem(getAddedExercisesKey(), JSON.stringify(names))
+      else localStorage.removeItem(getAddedExercisesKey())
+    } catch (e) {
+      console.error('Failed to save added exercises:', e)
+    }
+  }
+
+  const templateNames = new Set(exerciseTemplate.map(ex => ex.name))
+  const extraNames = isTomek ? [] : [
+    ...workouts.map(w => w.exercise_name).filter(name => !templateNames.has(name)),
+    ...addedExercises.filter(name => !templateNames.has(name))
+  ].filter((name, i, arr) => arr.indexOf(name) === i)
+  const extraExercises = extraNames.map(name =>
+    ALL_PRO_EXERCISES.find(ex => ex.name === name) || { name, sets: 3, reps: 10 }
+  )
+  const displayedExercises = [...exerciseTemplate, ...extraExercises]
+  const shownNames = new Set(displayedExercises.map(ex => ex.name))
+  const addableExercises = ALL_PRO_EXERCISES.filter(ex => !shownNames.has(ex.name))
+
+  function addExercise(name) {
+    if (!name || shownNames.has(name)) return
+    saveAddedExercises([...addedExercises, name])
+    setExerciseToAdd('')
+  }
+
+  function removeExtraExercise(name) {
+    const myRecord = workouts.find(w => w.exercise_name === name)
+    if (myRecord && !confirm(`Remove ${name} and its results from this day?`)) return
+    if (myRecord) persistSetRecords(myRecord, {})
+    saveAddedExercises(addedExercises.filter(n => n !== name))
+  }
+
+  // Previous results: same weekday first, otherwise the latest session with this exercise on any day
+  function findLastRecord(name) {
+    const hasSets = w => w.exercise_name === name && Object.keys(w.set_records || {}).length > 0
+    return lastWorkouts.find(hasSets) || allLastWorkouts.find(hasSets)
+  }
 
   function addSet(exerciseName) {
     setSetsCounts(prev => ({ ...prev, [exerciseName]: (prev[exerciseName] || 0) + 1 }))
@@ -447,13 +520,14 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
         <div className="alert alert-info">{noTrainingMessage}</div>
       ) : (
         <div className="row g-4">
-          {exerciseTemplate.map((exercise) => {
+          {displayedExercises.map((exercise) => {
+            const isExtra = !templateNames.has(exercise.name)
             const myRecord = workouts.find(w => w.exercise_name === exercise.name)
             const mySetRecords = myRecord?.set_records || {}
             const currentSets = setsCounts[exercise.name] || exercise.sets
 
             // Most recent previous session in which this exercise was actually logged
-            const lastRecord = lastWorkouts.find(w => w.exercise_name === exercise.name && Object.keys(w.set_records || {}).length > 0)
+            const lastRecord = findLastRecord(exercise.name)
             const lastSetRecords = lastRecord?.set_records || {}
             const lastSetIndices = Object.keys(lastSetRecords).map(Number).sort((a, b) => b - a)
             const lastSetIndex = lastSetIndices.length > 0 ? lastSetIndices[0] : null
@@ -474,17 +548,32 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
                   <div className={`card-header text-white ${isTomek ? 'bg-success' : 'bg-primary'}`}>
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <h5 className="mb-0">{exercise.name}</h5>
+                        <h5 className="mb-0">
+                          {exercise.name}
+                          {isExtra && <span className="badge bg-light text-primary ms-2" style={{ fontSize: '0.7rem', verticalAlign: 'middle' }}>Extra</span>}
+                        </h5>
                         <small>Target: {exercise.sets}×{exercise.reps}</small>
                       </div>
-                      <button
-                        className="btn btn-light btn-sm"
-                        onClick={() => addSet(exercise.name)}
-                        title="Add set"
-                        style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
-                      >
-                        +
-                      </button>
+                      <div className="d-flex gap-1">
+                        {isExtra && (
+                          <button
+                            className="btn btn-light btn-sm"
+                            onClick={() => removeExtraExercise(exercise.name)}
+                            title="Remove exercise from this day"
+                            style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '18px', lineHeight: '1' }}
+                          >
+                            ×
+                          </button>
+                        )}
+                        <button
+                          className="btn btn-light btn-sm"
+                          onClick={() => addSet(exercise.name)}
+                          title="Add set"
+                          style={{ width: '32px', height: '32px', padding: '0', fontWeight: 'bold', fontSize: '20px', lineHeight: '1' }}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="card-body">
@@ -556,6 +645,31 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
               </div>
             )
           })}
+        </div>
+      )}
+
+      {!isTomek && exerciseTemplate.length > 0 && (
+        <div className="card mt-4">
+          <div className="card-body">
+            <label className="form-label fw-bold" htmlFor="add-exercise">Add exercise</label>
+            <small className="d-block text-muted mb-2">Machine busy? Add another PRO exercise to this day only.</small>
+            <div className="d-flex gap-2">
+              <select
+                id="add-exercise"
+                className="form-select"
+                value={exerciseToAdd}
+                onChange={(e) => setExerciseToAdd(e.target.value)}
+              >
+                <option value="">Choose exercise…</option>
+                {addableExercises.map(ex => (
+                  <option key={ex.name} value={ex.name}>{ex.name}</option>
+                ))}
+              </select>
+              <button className="btn btn-primary" disabled={!exerciseToAdd} onClick={() => addExercise(exerciseToAdd)}>
+                Add
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
