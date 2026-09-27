@@ -179,7 +179,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
         .eq('user_id', user.id)
         .lt('date', selectedDate)
         .order('date', { ascending: false })
-        .limit(50)
+        .limit(500)
 
       if (isTomek) {
         query = query.eq('profile', 'tomek')
@@ -189,7 +189,11 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
       }
 
       const { data, error } = await query
-      if (!error && data) setLastWorkouts(data)
+      if (!error && data) {
+        // PRO: suggest results from the same weekday (previous Saturday for a Saturday, etc.)
+        const weekday = getWeekdayName(selectedDate)
+        setLastWorkouts(isTomek ? data : data.filter(w => getWeekdayName(w.date) === weekday))
+      }
     } catch (e) {
       console.error('Failed to fetch last workouts:', e)
     }
@@ -367,7 +371,8 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
             const mySetRecords = myRecord?.set_records || {}
             const currentSets = setsCounts[exercise.name] || exercise.sets
 
-            const lastRecord = lastWorkouts.find(w => w.exercise_name === exercise.name)
+            // Most recent previous session in which this exercise was actually logged
+            const lastRecord = lastWorkouts.find(w => w.exercise_name === exercise.name && Object.keys(w.set_records || {}).length > 0)
             const lastSetRecords = lastRecord?.set_records || {}
             const lastSetIndices = Object.keys(lastSetRecords).map(Number).sort((a, b) => b - a)
             const lastSetIndex = lastSetIndices.length > 0 ? lastSetIndices[0] : null
@@ -416,6 +421,8 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
                           const savedSet = mySetRecords[setIndex] || {}
                           const hasUserReps = savedSet.reps !== undefined && savedSet.reps !== null
                           const hasUserWeight = savedSet.weight !== undefined && savedSet.weight !== null
+                          // Same set from the previous session; extra sets fall back to its last set
+                          const lastSet = lastSetRecords[setIndex] || lastFinalSet
 
                           return (
                             <tr key={setIndex}>
@@ -424,7 +431,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
-                                  placeholder={lastFinalSet.reps ? `${lastFinalSet.reps}` : 'Reps'}
+                                  placeholder={lastSet.reps ? `${lastSet.reps}` : 'Reps'}
                                   defaultValue={savedSet.reps || ''}
                                   style={hasUserReps ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
@@ -437,7 +444,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
                                 <input
                                   type="number"
                                   className="form-control form-control-sm"
-                                  placeholder={lastFinalSet.weight ? `${lastFinalSet.weight}` : 'Weight'}
+                                  placeholder={lastSet.weight ? `${lastSet.weight}` : 'Weight'}
                                   defaultValue={savedSet.weight || ''}
                                   style={hasUserWeight ? { fontWeight: 'bold', color: '#dc3545' } : {}}
                                   onBlur={(e) => {
