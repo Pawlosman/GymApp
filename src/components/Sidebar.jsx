@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { supabase } from '../supabaseClient'
 import trainingsData from '../../data/trainings.json'
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -19,6 +20,33 @@ function getTrainingForMonth(monthIndex) {
     }
   }
   return null
+}
+
+function addDays(date, n) {
+  const d = new Date(date)
+  d.setDate(d.getDate() + n)
+  return d
+}
+
+// PRO training days (Tue/Thu/Sat) from 6 days back to 7 days ahead, with offset from today
+function proTrainingDaysAround(today) {
+  const days = []
+  for (let offset = -6; offset <= 7; offset++) {
+    const d = addDays(today, offset)
+    if ([2, 4, 6].includes(d.getDay())) days.push({ iso: isoDate(d), offset })
+  }
+  return days
+}
+
+// Nearest PRO training without records: the latest training day up to today, or an upcoming one.
+// On a tie (e.g. Wednesday between Tue and Thu) the earlier day wins.
+function nearestOpenProTraining(today, doneDates) {
+  const days = proTrainingDaysAround(today)
+  const past = days.filter(d => d.offset <= 0)
+  const candidates = [past[past.length - 1], ...days.filter(d => d.offset > 0)]
+    .filter(d => d && !doneDates.has(d.iso))
+  candidates.sort((a, b) => Math.abs(a.offset) - Math.abs(b.offset) || a.offset - b.offset)
+  return candidates[0]?.iso || null
 }
 
 function daysForMonth(yearMonth) {
@@ -47,13 +75,16 @@ function allDaysForMonth(yearMonth) {
   return days
 }
 
-export default function Sidebar({ onSelectDate, selectedDate, profile, selectedTraining }) {
+export default function Sidebar({ onSelectDate, selectedDate, profile, selectedTraining, user }) {
   const now = new Date()
   const defaultMonth = now.toISOString().slice(0, 7)
   const todayIso = isoDate(now)
   const [month, setMonth] = useState(defaultMonth)
   const [isOpen, setIsOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [suggestedDate, setSuggestedDate] = useState(null)
+  const autoSelectedRef = useRef(false)
+  const isPro = profile === 'tata'
 
   useEffect(() => {
     const handleResize = () => {
@@ -69,6 +100,41 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
       window.removeEventListener('toggleSidebar', toggleHandler)
     }
   }, [])
+
+  // Recompute the suggested PRO training whenever the menu opens or the selection changes
+  useEffect(() => {
+    if (!isPro || !user) return
+    let cancelled = false
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    async function loadSuggestion() {
+      let doneDates = new Set()
+      try {
+        const { data, error } = await supabase.from('workouts').select('date')
+          .eq('user_id', user.id)
+          .eq('profile', 'tata')
+          .gte('date', isoDate(addDays(today, -6)))
+          .lte('date', isoDate(addDays(today, 7)))
+        if (!error && data) doneDates = new Set(data.map(r => r.date))
+      } catch (e) {
+        console.error('Failed to load training records:', e)
+      }
+      if (!cancelled) setSuggestedDate(nearestOpenProTraining(today, doneDates))
+    }
+    loadSuggestion()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPro, user?.id, isOpen, selectedDate])
+
+  // On entering PRO, open the suggested training right away
+  useEffect(() => {
+    if (!isPro || !suggestedDate || autoSelectedRef.current) return
+    autoSelectedRef.current = true
+    if (!selectedDate) {
+      setMonth(suggestedDate.slice(0, 7))
+      onSelectDate(suggestedDate)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPro, suggestedDate])
 
   const [y, m] = month.split('-').map(Number)
   const isTomek = profile === 'tomek'
@@ -107,7 +173,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   const contentProps = {
     month, setMonth, days, currentTraining, trainingData,
     onSelectDate: handleSelectDate, todayIso, selectedDate,
-    profile, selectedTraining, isTomek, isSciatica, isCalisthenics
+    profile, selectedTraining, isTomek, isSciatica, isCalisthenics, suggestedDate
   }
 
   if (!isMobile) {
@@ -136,7 +202,7 @@ export default function Sidebar({ onSelectDate, selectedDate, profile, selectedT
   )
 }
 
-function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek, isSciatica, isCalisthenics }) {
+function SidebarContent({ month, setMonth, days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate, profile, selectedTraining, isTomek, isSciatica, isCalisthenics, suggestedDate }) {
   const tomekTrainings = trainingsData.tomekTrainings
 
   return (
@@ -179,15 +245,15 @@ function SidebarContent({ month, setMonth, days, currentTraining, trainingData, 
           currentTraining={currentTraining}
           trainingData={trainingData}
           onSelectDate={onSelectDate}
-          todayIso={todayIso}
           selectedDate={selectedDate}
+          suggestedDate={suggestedDate}
         />
       )}
     </>
   )
 }
 
-function TataSidebarContent({ days, currentTraining, trainingData, onSelectDate, todayIso, selectedDate }) {
+function TataSidebarContent({ days, currentTraining, trainingData, onSelectDate, selectedDate, suggestedDate }) {
   return (
     <>
       <div className="mb-4">
@@ -195,10 +261,11 @@ function TataSidebarContent({ days, currentTraining, trainingData, onSelectDate,
         <strong className="d-block mb-2">Training Days</strong>
         <div className="d-flex flex-column gap-2">
           {days.map((d) => {
-            const isToday = d.iso === todayIso
             const isSelected = selectedDate && d.iso === selectedDate
+            const isSuggested = d.iso === suggestedDate
             let btnClass = 'btn-outline-secondary'
-            if (isToday || isSelected) btnClass = 'btn-primary'
+            if (isSelected) btnClass = 'btn-primary'
+            else if (isSuggested) btnClass = 'btn-outline-primary'
             return (
               <button
                 key={d.iso}

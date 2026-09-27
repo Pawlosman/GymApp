@@ -185,6 +185,7 @@ export default function App() {
         selectedDate={selectedDate}
         profile={profile}
         selectedTraining={selectedTraining}
+        user={session.user}
       />
       <div style={{ flex: 1 }}>
         <nav className="navbar px-3 py-2 sticky-top shadow-sm bg-body-tertiary">
