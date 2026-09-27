@@ -45,6 +45,7 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
   const [setsCounts, setSetsCounts] = useState({})
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingSync, setPendingSync] = useState(false)
+  const [syncCount, setSyncCount] = useState(0)
 
   const isTomek = profile === 'tomek'
 
@@ -64,11 +65,17 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
     if (externalSelectedDate) setSelectedDate(externalSelectedDate)
   }, [externalSelectedDate])
 
+  // Push changes made offline as soon as the app starts online
+  useEffect(() => {
+    if (user) syncOfflineData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profile])
+
   useEffect(() => {
     if (!user) return
     fetchWorkouts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, selectedDate, profile, selectedTraining])
+  }, [user, selectedDate, profile, selectedTraining, syncCount])
 
   function getLocalStorageKey() {
     const trainingTag = isTomek && selectedTraining ? `_${selectedTraining.replace(/\s+/g, '_')}` : ''
@@ -102,35 +109,75 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
     }
   }
 
+  function getPendingDeleteKey() {
+    return `pending_delete_${profile}_${user?.id}`
+  }
+
+  // Remember a record deleted offline so it is removed from the database later
+  function queueDelete(id) {
+    const key = getPendingDeleteKey()
+    const ids = JSON.parse(localStorage.getItem(key) || '[]')
+    if (!ids.includes(id)) localStorage.setItem(key, JSON.stringify([...ids, id]))
+    setPendingSync(true)
+  }
+
   async function syncOfflineData() {
     if (!user || !navigator.onLine) return
+    let changed = false
+
+    const deleteKey = getPendingDeleteKey()
+    const idsToDelete = JSON.parse(localStorage.getItem(deleteKey) || '[]')
+    if (idsToDelete.length > 0) {
+      try {
+        const { error } = await supabase.from('workouts').delete().in('id', idsToDelete)
+        if (error) console.error('Sync delete error:', error)
+        else { localStorage.removeItem(deleteKey); changed = true }
+      } catch (e) {
+        console.error('Failed to sync deletes:', e)
+      }
+    }
+
     const pendingKey = `pending_sync_${profile}_${user.id}`
     const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
+    const failed = []
 
     for (const key of pending) {
       const [date, training] = key.split('::')
       const trainingTag = training ? `_${training.replace(/\s+/g, '_')}` : ''
       const localKey = `workouts_${profile}_${user.id}_${date}${trainingTag}`
       const localData = localStorage.getItem(localKey)
-      if (localData) {
-        const workoutsToSync = JSON.parse(localData)
-        for (const workout of workoutsToSync) {
-          try {
-            const { error } = await supabase.from('workouts').upsert(
-              { ...workout, user_id: user.id, date },
-              { onConflict: 'id' }
-            )
-            if (error) console.error('Sync error:', error)
-          } catch (e) {
-            console.error('Failed to sync:', e)
+      if (!localData) continue
+      let ok = true
+      const synced = []
+      for (const workout of JSON.parse(localData)) {
+        try {
+          if (String(workout.id).startsWith('temp_')) {
+            // Created offline: insert without the temporary id
+            const { id, ...row } = workout
+            const { data, error } = await supabase.from('workouts')
+              .insert([{ ...row, user_id: user.id, date }]).select()
+            if (error || !data?.[0]) { ok = false; synced.push(workout); if (error) console.error('Sync insert error:', error) }
+            else synced.push(data[0])
+          } else {
+            const { error } = await supabase.from('workouts')
+              .update({ set_records: workout.set_records }).eq('id', workout.id)
+            if (error) { ok = false; console.error('Sync update error:', error) }
+            synced.push(workout)
           }
+        } catch (e) {
+          ok = false
+          synced.push(workout)
+          console.error('Failed to sync:', e)
         }
       }
+      localStorage.setItem(localKey, JSON.stringify(synced))
+      if (ok) changed = true
+      else failed.push(key)
     }
 
-    localStorage.removeItem(pendingKey)
-    setPendingSync(false)
-    fetchWorkouts()
+    if (failed.length > 0) localStorage.setItem(pendingKey, JSON.stringify(failed))
+    else localStorage.removeItem(pendingKey)
+    if (changed || pending.length > 0) setSyncCount(c => c + 1)
   }
 
   async function fetchWorkouts() {
@@ -139,12 +186,15 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
     const pendingKey = `pending_sync_${profile}_${user.id}`
     const pending = JSON.parse(localStorage.getItem(pendingKey) || '[]')
     const key = isTomek && selectedTraining ? `${selectedDate}::${selectedTraining}` : selectedDate
-    setPendingSync(pending.includes(key))
+    const hasPendingChanges = pending.includes(key)
+    const hasPendingDeletes = JSON.parse(localStorage.getItem(getPendingDeleteKey()) || '[]').length > 0
+    setPendingSync(hasPendingChanges || hasPendingDeletes)
 
     const localData = loadFromLocalStorage()
     if (localData) setWorkouts(localData)
 
-    if (navigator.onLine) {
+    // Unsynced local changes win over the server copy until they are synced
+    if (navigator.onLine && !(hasPendingChanges && localData)) {
       try {
         let query = supabase.from('workouts').select('*')
           .eq('user_id', user.id)
@@ -271,15 +321,22 @@ export default function WorkoutList({ user, profile, selectedDate: externalSelec
       : workouts.map(w => w.exercise_name === myRecord.exercise_name ? { ...w, set_records: setRecords } : w)
     setWorkouts(updatedWorkouts)
     saveToLocalStorage(updatedWorkouts)
-    if (navigator.onLine && !String(myRecord.id).startsWith('temp_')) {
-      const request = isEmpty
-        ? supabase.from('workouts').delete().eq('id', myRecord.id)
-        : supabase.from('workouts').update({ set_records: setRecords }).eq('id', myRecord.id)
-      request.then(({ error }) => {
-        if (error) console.error('Failed to update set records:', error)
-        else clearPendingSync()
-      })
+    if (String(myRecord.id).startsWith('temp_')) return
+    // Offline (or on failure) the change stays cached: updates via the pending list, deletes via the delete queue
+    if (!navigator.onLine) {
+      if (isEmpty) queueDelete(myRecord.id)
+      return
     }
+    const request = isEmpty
+      ? supabase.from('workouts').delete().eq('id', myRecord.id)
+      : supabase.from('workouts').update({ set_records: setRecords }).eq('id', myRecord.id)
+    request.then(({ error }) => {
+      if (!error) clearPendingSync()
+      else {
+        console.error('Failed to update set records:', error)
+        if (isEmpty) queueDelete(myRecord.id)
+      }
+    }, () => { if (isEmpty) queueDelete(myRecord.id) })
   }
 
   // Clearing an input removes that value; a set with neither reps nor weight is removed
